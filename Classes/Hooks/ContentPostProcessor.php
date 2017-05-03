@@ -71,9 +71,8 @@ class ContentPostProcessor
         foreach ($result as $file) {
             if ($this->checkFileForInternal($file)) {
                 $baseUrl = $tsfe->baseUrl;
-                $absRefPrefix = $tsfe->absRefPrefix;
 
-                $fileUrl = $baseUrl.ltrim($absRefPrefix, '/').ltrim($file, '/');
+                $fileUrl = $baseUrl.ltrim($file, '/');
                 header('Link: <'.$fileUrl.'> '.$this->getConfigForFiletype($file), false);
             }
         }
