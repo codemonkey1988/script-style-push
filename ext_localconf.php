@@ -22,4 +22,3 @@ if (!defined('TYPO3_MODE')) {
 }
 
 $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['tslib/class.tslib_fe.php']['contentPostProc-all'][] = \Codemonkey1988\ScriptStylePush\Hooks\ContentPostProcessor::class.'->renderAll';
-$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['tslib/class.tslib_fe.php']['contentPostProc-output'][] = \Codemonkey1988\ScriptStylePush\Hooks\ContentPostProcessor::class.'->renderOutput';

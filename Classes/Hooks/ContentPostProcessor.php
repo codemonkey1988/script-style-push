@@ -20,6 +20,7 @@ namespace Codemonkey1988\ScriptStylePush\Hooks;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
+use TYPO3\CMS\Core\Utility\ArrayUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController;
 
@@ -32,45 +33,20 @@ use TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController;
  */
 class ContentPostProcessor
 {
-    var $headerLinkContent = [];
+    /**
+     * @var int
+     */
+    protected $addtionalHeadersStartKey = 1578;
 
     /**
      * Render method for cached pages
      *
-     * @param array $params
      * @return void
      */
-    public function renderAll(array &$params)
+    public function renderAll()
     {
-        if ($this->isTypoScriptFrontendInstance($params['pObj'])) {
-            $this->addPushHeaderTagsFromDocument($params['pObj']);
-            $this->addPushHeaderTagsFromTypoScript($params['pObj']);
-        }
-    }
-
-    /**
-     * Render method for INT pages
-     *
-     * @param array $params
-     * @return void
-     */
-    public function renderOutput(array &$params)
-    {
-        if ($this->isTypoScriptFrontendInstance($params['pObj'])) {
-            $this->addPushHeaderTagsFromDocument($params['pObj']);
-            $this->addPushHeaderTagsFromTypoScript($params['pObj']);
-        }
-    }
-
-    /**
-     * Check if the parameter is of type \TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController
-     *
-     * @param mixed $tsfe
-     * @return boolean
-     */
-    protected function isTypoScriptFrontendInstance(&$tsfe)
-    {
-        return is_object($tsfe) && $tsfe instanceof TypoScriptFrontendController;
+        $this->addPushHeaderTagsFromDocument($GLOBALS['TSFE']);
+        $this->addPushHeaderTagsFromTypoScript($GLOBALS['TSFE']);
     }
 
     /**
@@ -96,7 +72,7 @@ class ContentPostProcessor
                         $absFilePrefix = $GLOBALS['TSFE']->absRefPrefix;
 
                         $fileUrl = '/' . ltrim($absFilePrefix, '/') . ltrim($file, '/');
-                        header('Link: <' . $fileUrl . '>; ' . $this->getConfigForFiletype($file), false);
+                        $this->addHeader($fileUrl);
                     }
                 }
             }
@@ -116,9 +92,31 @@ class ContentPostProcessor
         foreach ($result as $file) {
             if ($this->checkFileForInternal($file)) {
                 $fileUrl = '/' . ltrim($file, '/');
-                header('Link: <' . $fileUrl . '>; ' . $this->getConfigForFiletype($file), false);
+                $this->addHeader($fileUrl);
             }
         }
+    }
+
+    /**
+     * @param string $fileUrl
+     * @return void
+     */
+    protected function addHeader($fileUrl)
+    {
+        $additionalHeaders = [
+            $this->addtionalHeadersStartKey . '.' => [
+                'header' => 'Link: <' . $fileUrl . '>; ' . $this->getConfigForFiletype($fileUrl),
+                'replace' => '0'
+            ]
+        ];
+
+        if (!isset($GLOBALS['TSFE']->config['config']['additionalHeaders.'])) {
+            $GLOBALS['TSFE']->config['config']['additionalHeaders.'] = [];
+        }
+
+       ArrayUtility::mergeRecursiveWithOverrule($GLOBALS['TSFE']->config['config']['additionalHeaders.'], $additionalHeaders);
+
+       $this->addtionalHeadersStartKey++;
     }
 
     /**
