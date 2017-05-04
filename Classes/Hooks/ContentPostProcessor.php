@@ -20,6 +20,7 @@ namespace Codemonkey1988\ScriptStylePush\Hooks;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController;
 
 /**
@@ -31,8 +32,7 @@ use TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController;
  */
 class ContentPostProcessor
 {
-
-    var $headerLinkContent = array();
+    var $headerLinkContent = [];
 
     /**
      * Render method for cached pages
@@ -43,7 +43,22 @@ class ContentPostProcessor
     public function renderAll(array &$params)
     {
         if ($this->isTypoScriptFrontendInstance($params['pObj']) && !$GLOBALS['TSFE']->isINTincScript()) {
-            $this->addPushHeaderTags($params['pObj']);
+            $this->addPushHeaderTagsFromDocument($params['pObj']);
+            $this->addPushHeaderTagsFromTypoScript($params['pObj']);
+        }
+    }
+
+    /**
+     * Render method for INT pages
+     *
+     * @param array $params
+     * @return void
+     */
+    public function renderOutput(array &$params)
+    {
+        if ($this->isTypoScriptFrontendInstance($params['pObj']) && $GLOBALS['TSFE']->isINTincScript()) {
+            $this->addPushHeaderTagsFromDocument($params['pObj']);
+            $this->addPushHeaderTagsFromTypoScript($params['pObj']);
         }
     }
 
@@ -59,21 +74,49 @@ class ContentPostProcessor
     }
 
     /**
+     * Add link headers that are defined in typoscript.
+     *
+     * @param TypoScriptFrontendController $tsfe
+     * @return void
+     */
+    protected function addPushHeaderTagsFromTypoScript(TypoScriptFrontendController &$tsfe)
+    {
+        if (isset($tsfe->tmpl->setup['plugin.']['tx_scriptstylepush.']['settings.']['headers.'])
+            && is_array(
+                $tsfe->tmpl->setup['plugin.']['tx_scriptstylepush.']['settings.']['headers.']
+            )
+        ) {
+            $absPathLength = strlen(PATH_site);
+            foreach ($tsfe->tmpl->setup['plugin.']['tx_scriptstylepush.']['settings.']['headers.'] as $file) {
+                if ($this->checkFileForInternal($file)) {
+                    $file = GeneralUtility::getFileAbsFileName($file);
+
+                    if ($file) {
+                        $file = substr($file, $absPathLength);
+                        $absFilePrefix = $GLOBALS['TSFE']->absRefPrefix;
+
+                        $fileUrl = $tsfe->baseUrl . ltrim($absFilePrefix, '/') . ltrim($file, '/');
+                        header('Link: <' . $fileUrl . '>; ' . $this->getConfigForFiletype($file), false);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
      * Parse the output content for stylesheets and script files.
      *
      * @param TypoScriptFrontendController $tsfe
      * @return void
      */
-    protected function addPushHeaderTags(TypoScriptFrontendController &$tsfe)
+    protected function addPushHeaderTagsFromDocument(TypoScriptFrontendController &$tsfe)
     {
         preg_match_all('/href="([^"]+\.css[^"]*)"|src="([^"]+\.js[^"]*)"/', $tsfe->content, $matches);
         $result = array_filter(array_merge($matches[1], $matches[2]));
         foreach ($result as $file) {
             if ($this->checkFileForInternal($file)) {
-                $baseUrl = $tsfe->baseUrl;
-
-                $fileUrl = $baseUrl.ltrim($file, '/');
-                header('Link: <'.$fileUrl.'>; '.$this->getConfigForFiletype($file), false);
+                $fileUrl = $tsfe->baseUrl . ltrim($file, '/');
+                header('Link: <' . $fileUrl . '>; ' . $this->getConfigForFiletype($file), false);
             }
         }
     }
@@ -87,22 +130,11 @@ class ContentPostProcessor
         $components = parse_url($file);
         if (!isset($components['host']) && !isset($components['scheme'])) {
             return true;
+        } elseif (isset($components['scheme']) && $components['scheme'] === 'EXT') {
+            return true;
         }
 
         return false;
-    }
-
-    /**
-     * Render method for INT pages
-     *
-     * @param array $params
-     * @return void
-     */
-    public function renderOutput(array &$params)
-    {
-        if ($this->isTypoScriptFrontendInstance($params['pObj']) && $GLOBALS['TSFE']->isINTincScript()) {
-            $this->addPushHeaderTags($params['pObj']);
-        }
     }
 
     /**
@@ -119,8 +151,27 @@ class ContentPostProcessor
             case "js":
                 return 'rel=preload; as=script';
                 break;
+            case 'svg':
+            case 'gif':
+            case 'png':
+            case 'jpg':
+            case 'jpeg':
+                return 'rel=preload; as=image';
+                break;
+            case 'mp4':
+                return 'rel=preload; as=media';
+                break;
+            case 'woff':
+                return 'rel=preload; as=font; type="font/woff';
+            case 'woff2':
+                return 'rel=preload; as=font; type="font/woff2';
+            case 'eot':
+                return 'rel=preload; as=font; type="font/eot';
+            case 'ttf':
+                return 'rel=preload; as=font; type="font/ttf';
             default:
-                return 'rel=preload';
+                // Do not push the resource when conent type does not match.
+                return 'rel=preload; nopush';
         }
     }
 }
