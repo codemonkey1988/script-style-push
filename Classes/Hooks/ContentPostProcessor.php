@@ -73,7 +73,7 @@ class ContentPostProcessor
                 $baseUrl = $tsfe->baseUrl;
 
                 $fileUrl = $baseUrl.ltrim($file, '/');
-                header('Link: <'.$fileUrl.'> '.$this->getConfigForFiletype($file), false);
+                header('Link: <'.$fileUrl.'>; '.$this->getConfigForFiletype($file), false);
             }
         }
     }
