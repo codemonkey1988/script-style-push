@@ -42,7 +42,7 @@ class ContentPostProcessor
      */
     public function renderAll(array &$params)
     {
-        if ($this->isTypoScriptFrontendInstance($params['pObj']) && !$GLOBALS['TSFE']->isINTincScript()) {
+        if ($this->isTypoScriptFrontendInstance($params['pObj'])) {
             $this->addPushHeaderTagsFromDocument($params['pObj']);
             $this->addPushHeaderTagsFromTypoScript($params['pObj']);
         }
@@ -56,7 +56,7 @@ class ContentPostProcessor
      */
     public function renderOutput(array &$params)
     {
-        if ($this->isTypoScriptFrontendInstance($params['pObj']) && $GLOBALS['TSFE']->isINTincScript()) {
+        if ($this->isTypoScriptFrontendInstance($params['pObj'])) {
             $this->addPushHeaderTagsFromDocument($params['pObj']);
             $this->addPushHeaderTagsFromTypoScript($params['pObj']);
         }
@@ -95,7 +95,7 @@ class ContentPostProcessor
                         $file = substr($file, $absPathLength);
                         $absFilePrefix = $GLOBALS['TSFE']->absRefPrefix;
 
-                        $fileUrl = $tsfe->baseUrl . ltrim($absFilePrefix, '/') . ltrim($file, '/');
+                        $fileUrl = '/' . ltrim($absFilePrefix, '/') . ltrim($file, '/');
                         header('Link: <' . $fileUrl . '>; ' . $this->getConfigForFiletype($file), false);
                     }
                 }
@@ -115,7 +115,7 @@ class ContentPostProcessor
         $result = array_filter(array_merge($matches[1], $matches[2]));
         foreach ($result as $file) {
             if ($this->checkFileForInternal($file)) {
-                $fileUrl = $tsfe->baseUrl . ltrim($file, '/');
+                $fileUrl = '/' . ltrim($file, '/');
                 header('Link: <' . $fileUrl . '>; ' . $this->getConfigForFiletype($file), false);
             }
         }
