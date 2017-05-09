@@ -5,6 +5,12 @@
   "homepage": "https://github.com/codemonkey1988/script-style-push/",
   "license": ["GPL-2.0+"],
   "keywords": ["TYPO3 CMS", "script_style_push"],
+  "authors": [
+    {
+      "name": "Tim Schreiner",
+      "role": "Developer"
+    }
+  ],
   "autoload": {
     "psr-4": {
       "Codemonkey1988\\ScriptStylePush\\": "Classes/"

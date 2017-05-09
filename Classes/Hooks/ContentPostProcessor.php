@@ -1,5 +1,4 @@
 <?php
-
 namespace Codemonkey1988\ScriptStylePush\Hooks;
 
 /***************************************************************
@@ -27,9 +26,8 @@ use TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController;
 /**
  * Class ContentPostProcessor
  *
- * @package    Codemonkey1988\ScriptStylePush
- * @subpackage Hooks
- * @author     Tim Schreiner <schreiner.tim@gmail.com>
+ * @package Codemonkey1988\ScriptStylePush\Hooks
+ * @author  Tim Schreiner <schreiner.tim@gmail.com>
  */
 class ContentPostProcessor
 {
@@ -68,7 +66,7 @@ class ContentPostProcessor
                     $file = GeneralUtility::getFileAbsFileName($file);
 
                     if ($file) {
-                        $file = substr($file, $absPathLength);
+                        $file          = substr($file, $absPathLength);
                         $absFilePrefix = $GLOBALS['TSFE']->absRefPrefix;
 
                         $fileUrl = '/' . ltrim($absFilePrefix, '/') . ltrim($file, '/');
@@ -105,7 +103,7 @@ class ContentPostProcessor
     {
         $additionalHeaders = [
             $this->addtionalHeadersStartKey . '.' => [
-                'header' => 'Link: <' . $fileUrl . '>; ' . $this->getConfigForFiletype($fileUrl),
+                'header'  => 'Link: <' . $fileUrl . '>; ' . $this->getConfigForFiletype($fileUrl),
                 'replace' => '0'
             ]
         ];
@@ -114,9 +112,9 @@ class ContentPostProcessor
             $GLOBALS['TSFE']->config['config']['additionalHeaders.'] = [];
         }
 
-       ArrayUtility::mergeRecursiveWithOverrule($GLOBALS['TSFE']->config['config']['additionalHeaders.'], $additionalHeaders);
+        ArrayUtility::mergeRecursiveWithOverrule($GLOBALS['TSFE']->config['config']['additionalHeaders.'], $additionalHeaders);
 
-       $this->addtionalHeadersStartKey++;
+        $this->addtionalHeadersStartKey++;
     }
 
     /**
