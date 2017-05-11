@@ -69,6 +69,8 @@ abstract class AbstractAssetViewHelper extends AbstractTagBasedViewHelper
         $filePath = $this->getPublicFilePath($this->arguments['path']);
 
         $this->addTagToPageRenderer($this->buildTag($filePath));
+
+        $GLOBALS['SCRIPT_STYPE_PUSH_ASSETS'][] = $this->arguments['name'];
     }
 
     /**
