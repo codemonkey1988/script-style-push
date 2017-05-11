@@ -1,15 +1,16 @@
 <?php
 
-$EM_CONF[$_EXTKEY] = array(
+$EM_CONF[$_EXTKEY] = [
     'title'            => 'Scrpt Style Push',
     'description'      => 'TYPO3 Extension to push javascript and css files over a http/2 connection.',
     'category'         => 'fe',
-    'contraints'       => array(
-        'depends'   => array(
-            'typo3' => '7.6.0-8.7.99',
-        ),
-        'conflicts' => array(),
-    ),
+    'contraints'       => [
+        'depends'   => [
+            'typo3' => '7.6.0-8.7.99'
+        ],
+        'conflicts' => [],
+        'suggests'  => []
+    ],
     'state'            => 'beta',
     'uploadfolder'     => false,
     'createDirs'       => '',
@@ -17,5 +18,5 @@ $EM_CONF[$_EXTKEY] = array(
     'author'           => 'Tim Schreiner',
     'author_email'     => 'schreiner.tim@gmail.com',
     'author_company'   => '',
-    'version'          => '1.1.1'
-);
+    'version'          => '1.2.0'
+];
