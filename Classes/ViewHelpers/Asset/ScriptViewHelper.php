@@ -61,7 +61,7 @@ class ScriptViewHelper extends AbstractAssetViewHelper
         $this->tag->addAttribute('type', 'text/javascript');
 
         if ($this->arguments['async'] === true) {
-            $this->tag->addAttribute('async', '');
+            $this->tag->addAttribute('async', 'async');
         }
 
         return $this->tag->render();
