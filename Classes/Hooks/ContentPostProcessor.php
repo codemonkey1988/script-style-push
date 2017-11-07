@@ -37,14 +37,25 @@ class ContentPostProcessor
     protected $addtionalHeadersStartKey = 1578;
 
     /**
+     * @var array
+     */
+    protected $assets = [];
+
+    /**
      * Render method for cached pages
      *
      * @return void
+     * @throws \UnexpectedValueException
      */
     public function renderAll()
     {
-        $this->addPushHeaderTagsFromDocument($GLOBALS['TSFE']);
-        $this->addPushHeaderTagsFromTypoScript($GLOBALS['TSFE']);
+        // Run this hook only if there is no http referrer. When there is one, that means that this template is loaded by an
+        // ajax request and shoul not contain data to be pushed.
+        if (!GeneralUtility::getIndpEnv('HTTP_REFERRER')) {
+            $this->addPushHeaderTagsFromDocument($GLOBALS['TSFE']);
+            $this->addPushHeaderTagsFromTypoScript($GLOBALS['TSFE']);
+            $this->addHeader();
+        }
     }
 
     /**
@@ -52,6 +63,7 @@ class ContentPostProcessor
      *
      * @param TypoScriptFrontendController $tsfe
      * @return void
+     * @throws \UnexpectedValueException
      */
     protected function addPushHeaderTagsFromTypoScript(TypoScriptFrontendController &$tsfe)
     {
@@ -70,7 +82,7 @@ class ContentPostProcessor
                         $absFilePrefix = $GLOBALS['TSFE']->absRefPrefix;
 
                         $fileUrl = '/' . ltrim($absFilePrefix, '/') . ltrim($file, '/');
-                        $this->addHeader($fileUrl);
+                        $this->addAsset($fileUrl);
                     }
                 }
             }
@@ -82,15 +94,17 @@ class ContentPostProcessor
      *
      * @param TypoScriptFrontendController $tsfe
      * @return void
+     * @throws \UnexpectedValueException
      */
     protected function addPushHeaderTagsFromDocument(TypoScriptFrontendController &$tsfe)
     {
         preg_match_all('/href="([^"]+\.css[^"]*)"|src="([^"]+\.js[^"]*)"/', $tsfe->content, $matches);
         $result = array_filter(array_merge($matches[1], $matches[2]));
+
         foreach ($result as $file) {
             if ($this->checkFileForInternal($file)) {
                 $fileUrl = '/' . ltrim($file, '/');
-                $this->addHeader($fileUrl);
+                $this->addAsset($fileUrl);
             }
         }
     }
@@ -98,13 +112,26 @@ class ContentPostProcessor
     /**
      * @param string $fileUrl
      * @return void
+     * @throws \UnexpectedValueException
      */
-    protected function addHeader($fileUrl)
+    protected function addAsset($fileUrl)
+    {
+        $host = GeneralUtility::getIndpEnv('HTTP_HOST');
+        $ssl = GeneralUtility::getIndpEnv('TYPO3_SSL');
+        $absFileUrl = ($ssl ? 'https' : 'http')  . '://' . $host . '/' . ltrim($fileUrl, '/');
+
+        $this->assets[] = '<' . $absFileUrl . '>; ' . $this->getConfigForFiletype($fileUrl);
+    }
+
+    /**
+     * @return void
+     */
+    protected function addHeader()
     {
         $additionalHeaders = [
             $this->addtionalHeadersStartKey . '.' => [
-                'header'  => 'Link: <' . $fileUrl . '>; ' . $this->getConfigForFiletype($fileUrl),
-                'replace' => '0'
+                'header'  => 'Link: ' . implode(', ', $this->assets),
+                'replace' => '1'
             ]
         ];
 
