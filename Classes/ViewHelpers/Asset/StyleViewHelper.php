@@ -39,28 +39,42 @@ class StyleViewHelper extends AbstractAssetViewHelper
     {
         parent::initializeArguments();
 
-        $this->registerArgument('media', 'string', '', false);
+        $this->registerArgument('alternate', 'boolean', 'If set then the rel-attribute will be "alternate stylesheet', false, false);
+        $this->registerArgument('import', 'boolean', 'If set then the @import way of including a stylesheet is used instead of <link>', false, false);
+        $this->registerArgument('inline', 'boolean', 'If set, the content of the CSS file is inlined using <style> tags. Note that external files are not inlined', false, false);
+        $this->registerArgument('media', 'string', 'Setting the media attribute of the <style> tag', false);
+        $this->registerArgument('title', 'string', 'Setting the title of the <style> tag', false);
     }
 
     /**
-     * @param string $filePath
-     * @return string
+     * {@inheritdoc}
      */
-    protected function buildTag($filePath)
+    protected function buildResourceInformation()
     {
-        $this->tag->reset();
-        $this->tag->setTagName('link');
-        $this->tag->forceClosingTag(false);
+        $resource = parent::buildResourceInformation();
 
-        // Build the tag.
-        $this->tag->addAttribute('href', $filePath);
-        $this->tag->addAttribute('type', 'text/css');
-        $this->tag->addAttribute('rel', 'stylesheet');
+        $resource[1]['alternate'] = $this->arguments['alternate'];
+        $resource[1]['import'] = $this->arguments['import'];
+        $resource[1]['inline'] = $this->arguments['inline'];
 
         if ($this->arguments['media']) {
-            $this->tag->addAttribute('media', $this->arguments['media']);
+            $resource[1]['media'] = $this->arguments['media'];
         }
 
-        return $this->tag->render();
+        if ($this->arguments['title']) {
+            $resource[1]['title'] = $this->arguments['title'];
+        }
+
+        return $resource;
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @link https://docs.typo3.org/typo3cms/TyposcriptReference/8.7/Setup/Page/
+     */
+    public function getTemplateSetupKeyForPosition(string $position)
+    {
+        return 'includeCSS';
     }
 }

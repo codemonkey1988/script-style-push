@@ -33,6 +33,12 @@ use TYPO3Fluid\Fluid\Core\ViewHelper\AbstractTagBasedViewHelper;
 abstract class AbstractAssetViewHelper extends AbstractTagBasedViewHelper
 {
     /**
+     * @var int index counter for scripts and styles in page template setup
+     */
+    protected static $templateSetupDataIndexCounter = 30000;
+
+
+    /**
      * @var string
      */
     protected $defaultTagPosition = 'header';
@@ -50,6 +56,9 @@ abstract class AbstractAssetViewHelper extends AbstractTagBasedViewHelper
         $this->registerArgument('name', 'string', 'Unique name of this file', true);
         $this->registerArgument('external', 'boolean', 'Is this an external file?', false, false);
         $this->registerArgument('position', 'string', 'Where should the file be added? (header / footer)', false);
+        $this->registerArgument('disableCompression', 'boolean', 'If config.compress{TYPE} is enabled, this disables the compression of this file', false, true);
+        $this->registerArgument('forceOnTop', 'boolean', 'Boolean flag. If set, this file will be added on top of all other files', false, false);
+        $this->registerArgument('excludeFromConcatenation', 'boolean', 'If config.concatenate{TYPE} is enabled, this prevents the file from being concatenated', false, false);
     }
 
     /**
@@ -66,65 +75,51 @@ abstract class AbstractAssetViewHelper extends AbstractTagBasedViewHelper
             return;
         }
 
-        $filePath = $this->getPublicFilePath($this->arguments['path']);
+        $position = $this->arguments['position'] ?: $this->defaultTagPosition;
+        $key = $this->getTemplateSetupKeyForPosition($position) . '.';
 
-        $this->addTagToPageRenderer($this->buildTag($filePath));
+        // Modify page template setup
+        $setup = &$GLOBALS['TSFE']->pSetup;
+
+        if (!array_key_exists($key, $setup)) {
+            $setup[$key] = [];
+        }
+
+        $resource = $this->buildResourceInformation();
+        $resourceIndex = static::$templateSetupDataIndexCounter++;
+        $setup[$key][$resourceIndex] = $resource[0];
+        if (count($resource) > 1) {
+            $setup[$key][$resourceIndex . '.'] = $resource[1];
+        }
 
         $GLOBALS['SCRIPT_STYPE_PUSH_ASSETS'][] = $this->arguments['name'];
     }
 
     /**
-     * Renders the tag.
+     * Builds the resource array for the file included into the page template setup
      *
-     * @param $filePath
-     * @return string The rendered tag.
-     */
-    abstract protected function buildTag($filePath);
-
-    /**
-     * @param string $filePath
-     * @return string
-     */
-    protected function getPublicFilePath($filePath)
-    {
-        if (!$this->arguments['external']) {
-            $absFilePath = GeneralUtility::getFileAbsFileName($filePath);
-
-            if ($absFilePath) {
-                $filePath = substr($absFilePath, strlen(PATH_site));
-                $filePath = GeneralUtility::createVersionNumberedFilename($filePath);
-            }
-        }
-
-        return $filePath;
-    }
-
-    /**
-     * @param string $tag
-     * @return void
-     */
-    protected function addTagToPageRenderer($tag)
-    {
-        if ($this->arguments['position'] === 'header') {
-            $this->getPageRenderer()->addHeaderData($tag);
-        } elseif ($this->arguments['position'] === 'footer') {
-            $this->getPageRenderer()->addFooterData($tag);
-        } else {
-            if ($this->defaultTagPosition === 'header') {
-                $this->getPageRenderer()->addHeaderData($tag);
-            } else {
-                $this->getPageRenderer()->addFooterData($tag);
-            }
-        }
-    }
-
-    /**
-     * Provides a shared (singleton) instance of PageRenderer
+     * @link https://docs.typo3.org/typo3cms/TyposcriptReference/8.7/Setup/Page/#includecss-array
+     * @link https://docs.typo3.org/typo3cms/TyposcriptReference/8.7/Setup/Page/#includejs-array
      *
-     * @return PageRenderer
+     * @return array resource information for use in page template setup. First value is the filepath, second the configuration
      */
-    protected function getPageRenderer()
+    protected function buildResourceInformation()
     {
-        return GeneralUtility::makeInstance(PageRenderer::class);
+        return [
+            $this->arguments['path'],
+            [
+                'external' => $this->arguments['external'],
+                'disableCompression' => $this->arguments['disableCompression'],
+                'forceOnTop' => $this->arguments['forceOnTop'],
+                'excludeFromConcatenation' => $this->arguments['excludeFromConcatenation']
+            ]
+        ];
     }
+
+    /**
+     * Receives the position
+     * @param string $position name of the position
+     * @return string key name from template setup section
+     */
+    public abstract function getTemplateSetupKeyForPosition(string $position);
 }
