@@ -3,7 +3,7 @@
   "type": "typo3-cms-extension",
   "description": "TYPO3 Extension to push javascript and css files over a http/2 connection.",
   "homepage": "https://github.com/codemonkey1988/script-style-push/",
-  "license": ["GPL-2.0+"],
+  "license": ["GPL-2.0-or-later"],
   "keywords": ["TYPO3 CMS", "script_style_push"],
   "authors": [
     {
