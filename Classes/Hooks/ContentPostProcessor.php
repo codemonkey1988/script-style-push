@@ -185,13 +185,13 @@ class ContentPostProcessor
                 return 'rel=preload; as=media';
                 break;
             case 'woff':
-                return 'rel=preload; as=font; type="font/woff';
+                return 'rel=preload; as=font; type=font/woff';
             case 'woff2':
-                return 'rel=preload; as=font; type="font/woff2';
+                return 'rel=preload; as=font; type=font/woff2';
             case 'eot':
-                return 'rel=preload; as=font; type="font/eot';
+                return 'rel=preload; as=font; type=font/eot';
             case 'ttf':
-                return 'rel=preload; as=font; type="font/ttf';
+                return 'rel=preload; as=font; type=font/ttf';
             default:
                 // Do not push the resource when conent type does not match.
                 return 'rel=preload; nopush';
