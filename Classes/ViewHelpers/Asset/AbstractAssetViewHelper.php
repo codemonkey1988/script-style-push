@@ -76,6 +76,18 @@ abstract class AbstractAssetViewHelper extends AbstractTagBasedViewHelper
         }
 
         $position = $this->arguments['position'] ?: $this->defaultTagPosition;
+        $this->addResourceToPageTemplateSetup($position);
+
+        $GLOBALS['SCRIPT_STYPE_PUSH_ASSETS'][] = $this->arguments['name'];
+    }
+
+    /**
+     * Add the resource to the template setup according to the given position
+     * 
+     * @param $position
+     */
+    protected function addResourceToPageTemplateSetup($position)
+    {
         $key = $this->getTemplateSetupKeyForPosition($position) . '.';
 
         // Modify page template setup
@@ -91,8 +103,6 @@ abstract class AbstractAssetViewHelper extends AbstractTagBasedViewHelper
         if (count($resource) > 1) {
             $setup[$key][$resourceIndex . '.'] = $resource[1];
         }
-
-        $GLOBALS['SCRIPT_STYPE_PUSH_ASSETS'][] = $this->arguments['name'];
     }
 
     /**
