@@ -69,7 +69,8 @@ class StyleViewHelper extends AbstractAssetViewHelper
     }
 
     /**
-     * {@inheritdoc}
+     * Returns the key in the page setup where these resources should be added to.
+     * Always return "includeCSS" because the page renderer only supports this position for CSS files yet.
      *
      * @link https://docs.typo3.org/typo3cms/TyposcriptReference/8.7/Setup/Page/
      */

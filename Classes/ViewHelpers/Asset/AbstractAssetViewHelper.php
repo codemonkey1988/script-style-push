@@ -84,7 +84,7 @@ abstract class AbstractAssetViewHelper extends AbstractTagBasedViewHelper
     /**
      * Add the resource to the template setup according to the given position
      * 
-     * @param $position
+     * @param string $position
      */
     protected function addResourceToPageTemplateSetup($position)
     {
