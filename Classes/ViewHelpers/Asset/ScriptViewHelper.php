@@ -43,27 +43,35 @@ class ScriptViewHelper extends AbstractAssetViewHelper
     public function initializeArguments()
     {
         parent::initializeArguments();
-        $this->registerArgument('async', 'boolean', '', false, false);
+        $this->registerArgument('async', 'boolean', 'Allows the file to be loaded asynchronously', false, false);
+        $this->registerArgument('type', 'boolean', 'Setting the MIME type of the script (default: text/javascript)', false, null);
+        $this->registerArgument('integrity', 'boolean', 'Adds the integrity attribute to the script element to let browsers ensure subresource integrity. Useful in hosting scenarios with resources externalized to CDN\'s. See SRI for more details. Integrity hashes may be generated using https://srihash.org/', false, false);
     }
 
     /**
-     * @param string $filePath
-     * @return string
+     * {@inheritdoc}
      */
-    protected function buildTag($filePath)
+    protected function buildResourceInformation()
     {
-        $this->tag->reset();
-        $this->tag->setTagName('script');
-        $this->tag->forceClosingTag(true);
+        $resource = parent::buildResourceInformation();
 
-        // Build the tag.
-        $this->tag->addAttribute('src', $filePath);
-        $this->tag->addAttribute('type', 'text/javascript');
+        $resource[1]['async'] = $this->arguments['async'];
+        $resource[1]['integrity'] = $this->arguments['integrity'];
 
-        if ($this->arguments['async'] === true) {
-            $this->tag->addAttribute('async', 'async');
+        if ($this->arguments['type']) {
+            $resource[1]['type'] = $this->arguments['type'];
         }
 
-        return $this->tag->render();
+        return $resource;
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @link https://docs.typo3.org/typo3cms/TyposcriptReference/8.7/Setup/Page/
+     */
+    public function getTemplateSetupKeyForPosition(string $position)
+    {
+        return $position == 'header' ? 'includeJS' : 'includeJSFooter';
     }
 }
