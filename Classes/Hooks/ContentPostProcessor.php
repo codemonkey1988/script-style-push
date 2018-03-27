@@ -100,8 +100,11 @@ class ContentPostProcessor
 
         foreach ($result as $file) {
             if ($this->fileCanBePushed($file)) {
-                $fileUrl = '/' . ltrim($file, '/');
-                $this->addAsset($fileUrl);
+                if (!$this->isExternalFile($file)) {
+                    $file = '/' . ltrim($file, '/');
+                }
+
+                $this->addAsset($file);
             }
         }
     }
@@ -113,11 +116,13 @@ class ContentPostProcessor
      */
     protected function addAsset($fileUrl)
     {
-        $host = GeneralUtility::getIndpEnv('HTTP_HOST');
-        $ssl = GeneralUtility::getIndpEnv('TYPO3_SSL');
-        $absFileUrl = ($ssl ? 'https' : 'http')  . '://' . $host . '/' . ltrim($fileUrl, '/');
+        if (!$this->isExternalFile($fileUrl)) {
+            $host = GeneralUtility::getIndpEnv('HTTP_HOST');
+            $ssl = GeneralUtility::getIndpEnv('TYPO3_SSL');
+            $fileUrl = ($ssl ? 'https' : 'http')  . '://' . $host . '/' . ltrim($fileUrl, '/');
+        }
 
-        $this->assets[] = '<' . $absFileUrl . '>; ' . $this->getConfigForFiletype($fileUrl);
+        $this->assets[] = '<' . $fileUrl . '>; ' . $this->getConfigForFiletype($fileUrl);
     }
 
     /**
@@ -152,7 +157,7 @@ class ContentPostProcessor
             return true;
         } elseif (isset($components['scheme']) && $components['scheme'] === 'EXT') {
             return true;
-        } elseif ($components['scheme'] === 'https' && !empty($GLOBALS['TSFE']->tmpl->setup['plugin.']['tx_scriptstylepush.']['settings.']['domains.'])) {
+        } elseif ($this->isExternalFile($file) && !empty($GLOBALS['TSFE']->tmpl->setup['plugin.']['tx_scriptstylepush.']['settings.']['domains.'])) {
             // Check if the domain is a valid push domain.
             if (is_array($GLOBALS['TSFE']->tmpl->setup['plugin.']['tx_scriptstylepush.']['settings.']['domains.'])) {
                 foreach ($GLOBALS['TSFE']->tmpl->setup['plugin.']['tx_scriptstylepush.']['settings.']['domains.'] as $domain) {
@@ -164,6 +169,17 @@ class ContentPostProcessor
         }
 
         return false;
+    }
+
+    /**
+     * @param string $file
+     * @return bool
+     */
+    protected function isExternalFile($file)
+    {
+        $components = parse_url($file);
+
+        return !empty($components['host']) && !empty($components['scheme']);
     }
 
     /**
