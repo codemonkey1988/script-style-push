@@ -21,7 +21,6 @@ namespace Codemonkey1988\ScriptStylePush\Hooks;
 
 use TYPO3\CMS\Core\Utility\ArrayUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController;
 
 /**
  * Class ContentPostProcessor
@@ -52,8 +51,8 @@ class ContentPostProcessor
         // Run this hook only if there is no http referrer. When there is one, that means that this template is loaded by an
         // ajax request and shoul not contain data to be pushed.
         if (!GeneralUtility::getIndpEnv('HTTP_REFERRER')) {
-            $this->addPushHeaderTagsFromDocument($GLOBALS['TSFE']);
-            $this->addPushHeaderTagsFromTypoScript($GLOBALS['TSFE']);
+            $this->addPushHeaderTagsFromDocument();
+            $this->addPushHeaderTagsFromTypoScript();
             $this->addHeader();
         }
     }
@@ -61,20 +60,19 @@ class ContentPostProcessor
     /**
      * Add link headers that are defined in typoscript.
      *
-     * @param TypoScriptFrontendController $tsfe
      * @return void
      * @throws \UnexpectedValueException
      */
-    protected function addPushHeaderTagsFromTypoScript(TypoScriptFrontendController &$tsfe)
+    protected function addPushHeaderTagsFromTypoScript()
     {
         if (isset($tsfe->tmpl->setup['plugin.']['tx_scriptstylepush.']['settings.']['headers.'])
             && is_array(
-                $tsfe->tmpl->setup['plugin.']['tx_scriptstylepush.']['settings.']['headers.']
+                $GLOBALS['TSFE']->tmpl->setup['plugin.']['tx_scriptstylepush.']['settings.']['headers.']
             )
         ) {
             $absPathLength = strlen(PATH_site);
-            foreach ($tsfe->tmpl->setup['plugin.']['tx_scriptstylepush.']['settings.']['headers.'] as $file) {
-                if ($this->checkFileForInternal($file)) {
+            foreach ($GLOBALS['TSFE']->tmpl->setup['plugin.']['tx_scriptstylepush.']['settings.']['headers.'] as $file) {
+                if ($this->fileCanBePushed($file)) {
                     $file = GeneralUtility::getFileAbsFileName($file);
 
                     if ($file) {
@@ -92,17 +90,16 @@ class ContentPostProcessor
     /**
      * Parse the output content for stylesheets and script files.
      *
-     * @param TypoScriptFrontendController $tsfe
      * @return void
      * @throws \UnexpectedValueException
      */
-    protected function addPushHeaderTagsFromDocument(TypoScriptFrontendController &$tsfe)
+    protected function addPushHeaderTagsFromDocument()
     {
-        preg_match_all('/href="([^"]+\.css[^"]*)"|src="([^"]+\.js[^"]*)"/', $tsfe->content, $matches);
+        preg_match_all('/href="([^"]+\.css[^"]*)"|src="([^"]+\.js[^"]*)"/', $GLOBALS['TSFE']->content, $matches);
         $result = array_filter(array_merge($matches[1], $matches[2]));
 
         foreach ($result as $file) {
-            if ($this->checkFileForInternal($file)) {
+            if ($this->fileCanBePushed($file)) {
                 $fileUrl = '/' . ltrim($file, '/');
                 $this->addAsset($fileUrl);
             }
@@ -148,13 +145,22 @@ class ContentPostProcessor
      * @param string $file
      * @return bool
      */
-    protected function checkFileForInternal($file)
+    protected function fileCanBePushed($file)
     {
         $components = parse_url($file);
         if (!isset($components['host']) && !isset($components['scheme'])) {
             return true;
         } elseif (isset($components['scheme']) && $components['scheme'] === 'EXT') {
             return true;
+        } elseif ($components['scheme'] === 'https' && !empty($GLOBALS['TSFE']->tmpl->setup['plugin.']['tx_scriptstylepush.']['settings.']['domains.'])) {
+            // Check if the domain is a valid push domain.
+            if (is_array($GLOBALS['TSFE']->tmpl->setup['plugin.']['tx_scriptstylepush.']['settings.']['domains.'])) {
+                foreach ($GLOBALS['TSFE']->tmpl->setup['plugin.']['tx_scriptstylepush.']['settings.']['domains.'] as $domain) {
+                    if (trim($domain) === $components['host']) {
+                        return true;
+                    }
+                }
+            }
         }
 
         return false;
