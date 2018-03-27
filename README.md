@@ -20,3 +20,16 @@ plugin.tx_scriptstylepush {
 	}
 }
 ```
+
+To make other domains work for push, you have to specify them with (without protocol)
+
+```
+plugin.tx_scriptstylepush {
+	settings {
+		domains {
+			0 = www.domain.tld
+			1 = domain.tld
+		}
+	}
+}
+```
