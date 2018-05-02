@@ -50,7 +50,7 @@ class ContentPostProcessor
     {
         // Run this hook only if there is no http referrer. When there is one, that means that this template is loaded by an
         // ajax request and shoul not contain data to be pushed.
-        if (!GeneralUtility::getIndpEnv('HTTP_REFERRER')) {
+        if ($this->isEnabled() && !GeneralUtility::getIndpEnv('HTTP_REFERRER')) {
             $this->addPushHeaderTagsFromDocument();
             $this->addPushHeaderTagsFromTypoScript();
             $this->addHeader();
@@ -218,5 +218,21 @@ class ContentPostProcessor
                 // Do not push the resource when conent type does not match.
                 return 'rel=preload; nopush';
         }
+    }
+
+    /**
+     * Checks if the plugin is enabled by typoscript.
+     *
+     * @return bool
+     */
+    protected function isEnabled()
+    {
+        $enabled = true;
+
+        if (!empty($GLOBALS['TSFE']->tmpl->setup['plugin.']['tx_scriptstylepush.']['settings.']) && array_key_exists('enabled', $GLOBALS['TSFE']->tmpl->setup['plugin.']['tx_scriptstylepush.']['settings.'])) {
+            $enabled = (bool)$GLOBALS['TSFE']->tmpl->setup['plugin.']['tx_scriptstylepush.']['settings.']['enabled'];
+        }
+
+        return $enabled;
     }
 }
