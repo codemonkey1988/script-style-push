@@ -4,7 +4,7 @@ $EM_CONF[$_EXTKEY] = [
     'title'            => 'Scrpt Style Push',
     'description'      => 'TYPO3 Extension to push javascript and css files over a http/2 connection.',
     'category'         => 'fe',
-    'contraints'       => [
+    'constraints'       => [
         'depends'   => [
             'typo3' => '7.6.0-9.5.99'
         ],
