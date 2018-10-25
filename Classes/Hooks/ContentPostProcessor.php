@@ -228,8 +228,11 @@ class ContentPostProcessor
     protected function isEnabled()
     {
         $enabled = true;
+        $enabledByEnv = getenv('SCRIPT_STYLE_PUSH_ENABLED');
 
-        if (!empty($GLOBALS['TSFE']->tmpl->setup['plugin.']['tx_scriptstylepush.']['settings.']) && array_key_exists('enabled', $GLOBALS['TSFE']->tmpl->setup['plugin.']['tx_scriptstylepush.']['settings.'])) {
+        if ($enabledByEnv !== false) {
+            $enabled = (bool)$enabledByEnv;
+        } elseif (!empty($GLOBALS['TSFE']->tmpl->setup['plugin.']['tx_scriptstylepush.']['settings.']) && array_key_exists('enabled', $GLOBALS['TSFE']->tmpl->setup['plugin.']['tx_scriptstylepush.']['settings.'])) {
             $enabled = (bool)$GLOBALS['TSFE']->tmpl->setup['plugin.']['tx_scriptstylepush.']['settings.']['enabled'];
         }
 
