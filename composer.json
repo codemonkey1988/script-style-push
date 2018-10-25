@@ -4,16 +4,31 @@
   "description": "TYPO3 Extension to push javascript and css files over a http/2 connection.",
   "homepage": "https://github.com/codemonkey1988/script-style-push/",
   "license": ["GPL-2.0-or-later"],
-  "keywords": ["TYPO3 CMS", "script_style_push"],
+  "keywords": [
+    "TYPO3 CMS", 
+    "script_style_push",
+    "http2",
+    "push"
+  ],
   "authors": [
     {
       "name": "Tim Schreiner",
+      "email": "schreiner.tim@gmail.com",
       "role": "Developer"
     }
   ],
+  "minimum-stability": "stable",
+  "require": {
+    "php": ">=7.0 <7.3",
+    "typo3/cms-core": "^7.6 || ^8.7 || ^9.5"
+  },
   "autoload": {
     "psr-4": {
       "Codemonkey1988\\ScriptStylePush\\": "Classes/"
     }
+  },
+  "replace": {
+    "script_style_push": "self.version",
+    "typo3-ter/script-style-push": "self.version"
   }
 }

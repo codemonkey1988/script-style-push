@@ -6,12 +6,12 @@ $EM_CONF[$_EXTKEY] = [
     'category'         => 'fe',
     'contraints'       => [
         'depends'   => [
-            'typo3' => '7.6.0-8.7.99'
+            'typo3' => '7.6.0-9.5.99'
         ],
         'conflicts' => [],
         'suggests'  => []
     ],
-    'state'            => 'beta',
+    'state'            => 'stable',
     'uploadfolder'     => false,
     'createDirs'       => '',
     'clearCacheOnLoad' => true,
