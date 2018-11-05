@@ -1,35 +1,24 @@
-# script-style-push
-TYPO3 Extension to push javascript and css files over a http/2 connection.
-The css and javascript files are automatically parsed from rendered html.
+# HTTP/2 Push Extension for TYPO3
 
-This extension does not push images autoamtically, because of huge traffic overload when 
-using responsive images. Each image in the pciture source would be pushed 
+TYPO3 Extension to push JavaScript and CSS files over a HTTP/2 connection.
+The CSS and JavaScript files are automatically parsed from rendered html.
+
+This extension does not push images automatically, because of huge traffic overload when 
+using responsive images. Each image in the picture source would be pushed 
 to the client.
 
-To add other resources as push, TypoScript can be used. 
 
-Example
+## Installation
 
-```
-plugin.tx_scriptstylepush {
-	settings {
-		headers {
-			0 = EXT:my_ext/Resources/Public/img/my-image.jpeg
-			1 = EXT:my_ext/Resources/Public/fonts/my-font.woff2
-		}
-	}
-}
-```
+`composer require codemonkey1988/script-style-push`
 
-To make other domains work for push, you have to specify them with (without protocol)
+## Configuration
 
-```
-plugin.tx_scriptstylepush {
-	settings {
-		domains {
-			0 = www.domain.tld
-			1 = domain.tld
-		}
-	}
-}
-```
+To support your used CSS and JavaScript files, you just need to install this extension.
+The extension will automatically push every CSS and JavaScript file found in the 
+html response.
+
+You can add custom resources to push. Just add a comma separated list of asset paths 
+to the site configuration. Just add a comma separated list of assets. 
+Keep in mind, that this might change in the future as TYPO3 supports additional custom
+field types for site configuration.
