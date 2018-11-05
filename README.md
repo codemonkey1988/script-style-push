@@ -22,3 +22,8 @@ You can add custom resources to push. Just add a comma separated list of asset p
 to the site configuration. Just add a comma separated list of assets. 
 Keep in mind, that this might change in the future as TYPO3 supports additional custom
 field types for site configuration.
+
+### Disabling this extension
+
+If you need to disable generating the Link header, 
+you can do this by setting the env variable `SCRIPT_STYLE_PUSH_ENABLED` to 1.
