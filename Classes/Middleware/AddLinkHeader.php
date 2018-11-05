@@ -1,77 +1,67 @@
 <?php
-namespace Codemonkey1988\ScriptStylePush\Hooks;
+declare(strict_types=1);
+namespace Codemonkey1988\ScriptStylePush\Middleware;
 
-/***************************************************************
- *  This script is part of the TYPO3 project. The TYPO3 project is
- *  free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  The GNU General Public License can be found at
- *  http://www.gnu.org/copyleft/gpl.html.
- *
- *  This script is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  This copyright notice MUST APPEAR in all copies of the script!
- ***************************************************************/
-
-use TYPO3\CMS\Core\Utility\ArrayUtility;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\MiddlewareInterface;
+use Psr\Http\Server\RequestHandlerInterface;
+use TYPO3\CMS\Core\Site\Entity\Site;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
- * Class ContentPostProcessor
- *
- * @package Codemonkey1988\ScriptStylePush\Hooks
- * @author  Tim Schreiner <schreiner.tim@gmail.com>
+ * Class AddLinkHeader
  */
-class ContentPostProcessor
+class AddLinkHeader implements MiddlewareInterface
 {
-    /**
-     * @var int
-     */
-    protected $addtionalHeadersStartKey = 1578;
-
     /**
      * @var array
      */
     protected $assets = [];
 
     /**
-     * Render method for cached pages
-     *
-     * @return void
-     * @throws \UnexpectedValueException
+     * @var string
      */
-    public function renderAll()
+    protected $baseUrl;
+
+    /**
+     * @inheritdoc
+     */
+    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
+        $response = $handler->handle($request);
+        $site = $request->getAttribute('site');
+
         // Run this hook only if there is no http referrer. When there is one, that means that this template is loaded by an
-        // ajax request and shoul not contain data to be pushed.
-        if ($this->isEnabled() && !GeneralUtility::getIndpEnv('HTTP_REFERRER')) {
-            $this->addPushHeaderTagsFromDocument();
-            $this->addPushHeaderTagsFromTypoScript();
-            $this->addHeader();
+        // ajax request and should not contain data to be pushed.
+        if ($this->isEnabled() && $site instanceof Site && !GeneralUtility::getIndpEnv('HTTP_REFERRER')) {
+            $response->getBody()->rewind();
+            $this->baseUrl = (string)$site->getBase();
+
+            $this->addAssetsFromDocument($response->getBody()->getContents());
+            $this->addAssetsFromSiteConfiguration($site);
+
+            $response = $response->withHeader('Link', implode(', ', $this->assets));
         }
+
+        return $response;
     }
 
     /**
      * Add link headers that are defined in typoscript.
      *
+     * @param Site $site
      * @return void
-     * @throws \UnexpectedValueException
      */
-    protected function addPushHeaderTagsFromTypoScript()
+    protected function addAssetsFromSiteConfiguration(Site $site)
     {
-        if (isset($tsfe->tmpl->setup['plugin.']['tx_scriptstylepush.']['settings.']['headers.'])
-            && is_array(
-                $GLOBALS['TSFE']->tmpl->setup['plugin.']['tx_scriptstylepush.']['settings.']['headers.']
-            )
-        ) {
+        $assetConfiguration = $site->getConfiguration()['assetsToPush'];
+
+        if (!empty($assetConfiguration)) {
+            $assets = GeneralUtility::trimExplode(',', $assetConfiguration);
             $absPathLength = strlen(PATH_site);
-            foreach ($GLOBALS['TSFE']->tmpl->setup['plugin.']['tx_scriptstylepush.']['settings.']['headers.'] as $file) {
+
+            foreach ($assets as $file) {
                 if ($this->fileCanBePushed($file)) {
                     $file = GeneralUtility::getFileAbsFileName($file);
 
@@ -90,12 +80,12 @@ class ContentPostProcessor
     /**
      * Parse the output content for stylesheets and script files.
      *
+     * @param string $body
      * @return void
-     * @throws \UnexpectedValueException
      */
-    protected function addPushHeaderTagsFromDocument()
+    protected function addAssetsFromDocument(string $body)
     {
-        preg_match_all('/href="([^"]+\.css[^"]*)"|src="([^"]+\.js[^"]*)"/', $GLOBALS['TSFE']->content, $matches);
+        preg_match_all('/href="([^"]+\.css[^"]*)"|src="([^"]+\.js[^"]*)"/', $body, $matches);
         $result = array_filter(array_merge($matches[1], $matches[2]));
 
         foreach ($result as $file) {
@@ -117,33 +107,9 @@ class ContentPostProcessor
     protected function addAsset($fileUrl)
     {
         if (!$this->isExternalFile($fileUrl)) {
-            $host = GeneralUtility::getIndpEnv('HTTP_HOST');
-            $ssl = GeneralUtility::getIndpEnv('TYPO3_SSL');
-            $fileUrl = ($ssl ? 'https' : 'http')  . '://' . $host . '/' . ltrim($fileUrl, '/');
+            $fileUrl = $this->baseUrl . ltrim($fileUrl, '/');
+            $this->assets[] = '<' . $fileUrl . '>; ' . $this->getConfigForFiletype($fileUrl);
         }
-
-        $this->assets[] = '<' . $fileUrl . '>; ' . $this->getConfigForFiletype($fileUrl);
-    }
-
-    /**
-     * @return void
-     */
-    protected function addHeader()
-    {
-        $additionalHeaders = [
-            $this->addtionalHeadersStartKey . '.' => [
-                'header'  => 'Link: ' . implode(', ', $this->assets),
-                'replace' => '1'
-            ]
-        ];
-
-        if (!isset($GLOBALS['TSFE']->config['config']['additionalHeaders.'])) {
-            $GLOBALS['TSFE']->config['config']['additionalHeaders.'] = [];
-        }
-
-        ArrayUtility::mergeRecursiveWithOverrule($GLOBALS['TSFE']->config['config']['additionalHeaders.'], $additionalHeaders);
-
-        $this->addtionalHeadersStartKey++;
     }
 
     /**

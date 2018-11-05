@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<xliff version="1.0">
+    <file source-language="en" datatype="plaintext" original="messages" date="2018-11-05T19:04:59Z"
+          product-name="script-style-push">
+        <header/>
+        <body>
+            <trans-unit id="siteConfiguration.site.tab.pushAssets">
+                <source>Asset push</source>
+            </trans-unit>
+            <trans-unit id="siteConfiguration.site.assetsToPush.label">
+                <source>Assets to push</source>
+            </trans-unit>
+            <trans-unit id="siteConfiguration.site.assetsToPush.description">
+                <source>Comma-separated list of assets</source>
+            </trans-unit>
+            <trans-unit id="siteConfiguration.site.assetsToPush.placeholder">
+                <source>EXT:site_package/Resources/Public/fonts/example.woff</source>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>
