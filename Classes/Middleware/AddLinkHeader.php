@@ -107,7 +107,7 @@ class AddLinkHeader implements MiddlewareInterface
     protected function addAsset($fileUrl)
     {
         if (!$this->isExternalFile($fileUrl)) {
-            $fileUrl = $this->baseUrl . ltrim($fileUrl, '/');
+            $fileUrl = rtrim($this->baseUrl, '/') . '/' . ltrim($fileUrl, '/');
             $this->assets[] = '<' . $fileUrl . '>; ' . $this->getConfigForFiletype($fileUrl);
         }
     }
