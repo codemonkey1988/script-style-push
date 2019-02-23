@@ -20,11 +20,6 @@ class AddLinkHeader implements MiddlewareInterface
     protected $assets = [];
 
     /**
-     * @var string
-     */
-    protected $baseUrl;
-
-    /**
      * @inheritdoc
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
@@ -36,7 +31,6 @@ class AddLinkHeader implements MiddlewareInterface
         // ajax request and should not contain data to be pushed.
         if ($this->isEnabled() && $site instanceof Site && !GeneralUtility::getIndpEnv('HTTP_REFERRER')) {
             $response->getBody()->rewind();
-            $this->baseUrl = (string)$site->getBase();
 
             $this->addAssetsFromDocument($response->getBody()->getContents());
             $this->addAssetsFromSiteConfiguration($site);
@@ -107,7 +101,7 @@ class AddLinkHeader implements MiddlewareInterface
     protected function addAsset($fileUrl)
     {
         if (!$this->isExternalFile($fileUrl)) {
-            $fileUrl = rtrim($this->baseUrl, '/') . '/' . ltrim($fileUrl, '/');
+            $fileUrl = '/' . ltrim($fileUrl, '/');
             $this->assets[] = '<' . $fileUrl . '>; ' . $this->getConfigForFiletype($fileUrl);
         }
     }
