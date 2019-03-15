@@ -26,4 +26,4 @@ field types for site configuration.
 ### Disabling this extension
 
 If you need to disable generating the Link header, 
-you can do this by setting the env variable `SCRIPT_STYLE_PUSH_ENABLED` to 1.
+you can do this by setting the env variable `SCRIPT_STYLE_PUSH_DISABLED` to 1.
