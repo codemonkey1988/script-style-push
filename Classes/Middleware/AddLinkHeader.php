@@ -29,7 +29,7 @@ class AddLinkHeader implements MiddlewareInterface
 
         // Run this hook only if there is no http referrer. When there is one, that means that this template is loaded by an
         // ajax request and should not contain data to be pushed.
-        if ($this->isEnabled() && $site instanceof Site && !GeneralUtility::getIndpEnv('HTTP_REFERRER')) {
+        if (!$this->isDisabled() && $site instanceof Site && !GeneralUtility::getIndpEnv('HTTP_REFERRER')) {
             $response->getBody()->rewind();
 
             $this->addAssetsFromDocument($response->getBody()->getContents());
@@ -181,12 +181,12 @@ class AddLinkHeader implements MiddlewareInterface
     }
 
     /**
-     * Checks if the plugin is enabled by typoscript.
+     * Checks if the plugin is disabled by an env variable.
      *
      * @return bool
      */
-    protected function isEnabled()
+    protected function isDisabled()
     {
-        return (bool)getenv('SCRIPT_STYLE_PUSH_ENABLED');
+        return (bool)getenv('SCRIPT_STYLE_PUSH_DISABLED');
     }
 }
