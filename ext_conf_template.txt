@@ -1,0 +1,2 @@
+# cat=basic/enable; type=boolean; label=Enable over-push prevention:By enabling this, a session cookie will be set that contains every assets pushed to the client. Assets that were already pushed are not pushed again.
+enableOverpushPrevention = 1

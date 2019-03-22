@@ -23,6 +23,11 @@ to the site configuration. Just add a comma separated list of assets.
 Keep in mind, that this might change in the future as TYPO3 supports additional custom
 field types for site configuration.
 
+### Prevent asset over-pushing
+This extension help you preventing over-pushing of assets by setting a session cookie that contains all assets
+that were pushing during the user session. This extension will not push an asset, if it's in the cookie.
+This feature can be disabled in extension settings.
+
 ### Disabling this extension
 
 If you need to disable generating the Link header, 

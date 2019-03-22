@@ -2,6 +2,7 @@
 declare(strict_types=1);
 namespace Codemonkey1988\ScriptStylePush\Middleware;
 
+use Codemonkey1988\ScriptStylePush\Cache\AssetCache;
 use Codemonkey1988\ScriptStylePush\Resource\Asset;
 use Codemonkey1988\ScriptStylePush\Resource\AssetCollector;
 use Codemonkey1988\ScriptStylePush\Utility\Configuration;
@@ -30,7 +31,10 @@ class AddLinkHeader implements MiddlewareInterface
             $body = $response->getBody()->getContents();
             $additionalAssets = $site->getConfiguration()['assetsToPush'] ?? '';
             $assetCollector = new AssetCollector($body, $additionalAssets);
-            $response = $response->withHeader('Link', $this->renderHeaderContent($assetCollector->fetch()));
+            $headerContent = $this->renderHeaderContent($assetCollector->fetch());
+            if ($headerContent) {
+                $response = $response->withHeader('Link', $headerContent);
+            }
         }
 
         return $response;
@@ -43,13 +47,17 @@ class AddLinkHeader implements MiddlewareInterface
     protected function renderHeaderContent(\SplObjectStorage $assets): string
     {
         $assetsToPush = [];
+        $assetCache = GeneralUtility::makeInstance(AssetCache::class);
 
         /** @var Asset $asset */
         foreach ($assets as $asset) {
-            if ($asset->isPushEnabled()) {
+            if ($asset->isPushEnabled() && $assetCache->shouldPush($asset)) {
                 $assetsToPush[] = $this->buildHeaderForSingleAsset($asset);
+                $assetCache->add($asset);
             }
         }
+
+        $assetCache->persist();
 
         return implode(',', $assetsToPush);
     }
