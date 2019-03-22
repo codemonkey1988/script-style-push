@@ -2,6 +2,9 @@
 declare(strict_types=1);
 namespace Codemonkey1988\ScriptStylePush\Middleware;
 
+use Codemonkey1988\ScriptStylePush\Resource\Asset;
+use Codemonkey1988\ScriptStylePush\Resource\AssetCollector;
+use Codemonkey1988\ScriptStylePush\Utility\Configuration;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -15,11 +18,6 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 class AddLinkHeader implements MiddlewareInterface
 {
     /**
-     * @var array
-     */
-    protected $assets = [];
-
-    /**
      * @inheritdoc
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
@@ -27,166 +25,65 @@ class AddLinkHeader implements MiddlewareInterface
         $response = $handler->handle($request);
         $site = $request->getAttribute('site');
 
-        // Run this hook only if there is no http referrer. When there is one, that means that this template is loaded by an
-        // ajax request and should not contain data to be pushed.
-        if (!$this->isDisabled() && $site instanceof Site && !GeneralUtility::getIndpEnv('HTTP_REFERRER')) {
+        if (!Configuration::isPushDisabled() && $site instanceof Site && !$this->isXhrRequest()) {
             $response->getBody()->rewind();
-
-            $this->addAssetsFromDocument($response->getBody()->getContents());
-            $this->addAssetsFromSiteConfiguration($site);
-
-            $response = $response->withHeader('Link', implode(', ', $this->assets));
+            $body = $response->getBody()->getContents();
+            $additionalAssets = $site->getConfiguration()['assetsToPush'] ?? '';
+            $assetCollector = new AssetCollector($body, $additionalAssets);
+            $response = $response->withHeader('Link', $this->renderHeaderContent($assetCollector->fetch()));
         }
 
         return $response;
     }
 
     /**
-     * Add link headers that are defined in typoscript.
-     *
-     * @param Site $site
-     * @return void
-     */
-    protected function addAssetsFromSiteConfiguration(Site $site)
-    {
-        $assetConfiguration = $site->getConfiguration()['assetsToPush'];
-
-        if (!empty($assetConfiguration)) {
-            $assets = GeneralUtility::trimExplode(',', $assetConfiguration);
-            $absPathLength = strlen(PATH_site);
-
-            foreach ($assets as $file) {
-                if ($this->fileCanBePushed($file)) {
-                    $file = GeneralUtility::getFileAbsFileName($file);
-
-                    if ($file) {
-                        $file          = substr($file, $absPathLength);
-                        $absFilePrefix = $GLOBALS['TSFE']->absRefPrefix;
-
-                        $fileUrl = '/' . ltrim($absFilePrefix, '/') . ltrim($file, '/');
-                        $this->addAsset($fileUrl);
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * Parse the output content for stylesheets and script files.
-     *
-     * @param string $body
-     * @return void
-     */
-    protected function addAssetsFromDocument(string $body)
-    {
-        preg_match_all('/href="([^"]+\.css[^"]*)"|src="([^"]+\.js[^"]*)"/', $body, $matches);
-        $result = array_filter(array_merge($matches[1], $matches[2]));
-
-        foreach ($result as $file) {
-            if ($this->fileCanBePushed($file)) {
-                if (!$this->isExternalFile($file)) {
-                    $file = '/' . ltrim($file, '/');
-                }
-
-                $this->addAsset($file);
-            }
-        }
-    }
-
-    /**
-     * @param string $fileUrl
-     * @return void
-     * @throws \UnexpectedValueException
-     */
-    protected function addAsset($fileUrl)
-    {
-        if (!$this->isExternalFile($fileUrl)) {
-            $fileUrl = '/' . ltrim($fileUrl, '/');
-            $this->assets[] = '<' . $fileUrl . '>; ' . $this->getConfigForFiletype($fileUrl);
-        }
-    }
-
-    /**
-     * @param string $file
-     * @return bool
-     */
-    protected function fileCanBePushed($file)
-    {
-        $components = parse_url($file);
-        if (!isset($components['host']) && !isset($components['scheme'])) {
-            return true;
-        } elseif (isset($components['scheme']) && $components['scheme'] === 'EXT') {
-            return true;
-        } elseif ($this->isExternalFile($file) && !empty($GLOBALS['TSFE']->tmpl->setup['plugin.']['tx_scriptstylepush.']['settings.']['domains.'])) {
-            // Check if the domain is a valid push domain.
-            if (is_array($GLOBALS['TSFE']->tmpl->setup['plugin.']['tx_scriptstylepush.']['settings.']['domains.'])) {
-                foreach ($GLOBALS['TSFE']->tmpl->setup['plugin.']['tx_scriptstylepush.']['settings.']['domains.'] as $domain) {
-                    if (trim($domain) === $components['host']) {
-                        return true;
-                    }
-                }
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * @param string $file
-     * @return bool
-     */
-    protected function isExternalFile($file)
-    {
-        $components = parse_url($file);
-
-        return !empty($components['host']) && !empty($components['scheme']);
-    }
-
-    /**
-     * @param string $file
+     * @param \SplObjectStorage $assets
      * @return string
      */
-    protected function getConfigForFiletype($file)
+    protected function renderHeaderContent(\SplObjectStorage $assets): string
     {
-        $extension = end(explode('.', parse_url($file, PHP_URL_PATH)));
-        switch ($extension) {
-            case "css":
-                return 'rel=preload; as=style';
-                break;
-            case "js":
-                return 'rel=preload; as=script';
-                break;
-            case 'svg':
-            case 'gif':
-            case 'png':
-            case 'jpg':
-            case 'jpeg':
-                return 'rel=preload; as=image';
-                break;
-            case 'mp4':
-                return 'rel=preload; as=media';
-                break;
-            case 'woff':
-                return 'rel=preload; as=font; type=font/woff; crossorigin';
-            case 'woff2':
-                return 'rel=preload; as=font; type=font/woff2; crossorigin';
-            case 'eot':
-                return 'rel=preload; as=font; type=font/eot; crossorigin';
-            case 'ttf':
-                return 'rel=preload; as=font; type=font/ttf; crossorigin';
-            default:
-                // Do not push the resource when conent type does not match.
-                return 'rel=preload; nopush';
+        $assetsToPush = [];
+
+        /** @var Asset $asset */
+        foreach ($assets as $asset) {
+            $assetsToPush[] = $this->buildHeaderForSingleAsset($asset);
         }
+
+        return implode(',', $assetsToPush);
     }
 
     /**
-     * Checks if the plugin is disabled by an env variable.
+     * @param Asset $asset
+     * @return string
+     */
+    protected function buildHeaderForSingleAsset(Asset $asset)
+    {
+        $parts = [
+            '<' . $asset->getFile() . '>',
+            'rel=preload',
+        ];
+
+        if ( $asset->getAssetType()) {
+            $parts[] = 'as=' . $asset->getAssetType();
+        }
+        if ( $asset->getType()) {
+            $parts[] = 'type=' . $asset->getType();
+        }
+        if ($asset->isCrossorigin()) {
+            $parts[] = 'crossorigin';
+        }
+
+        return implode(';', $parts);
+    }
+
+    /**
+     * Checks is the current request may be an XHR request.
+     * We typically do not need to push assets in xhr requests.
      *
      * @return bool
      */
-    protected function isDisabled()
+    protected function isXhrRequest(): bool
     {
-        return (bool)getenv('SCRIPT_STYLE_PUSH_DISABLED');
+        return (bool)GeneralUtility::getIndpEnv('HTTP_REFERRER');
     }
 }

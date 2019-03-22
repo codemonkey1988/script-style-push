@@ -19,16 +19,23 @@
   ],
   "minimum-stability": "stable",
   "require": {
-    "php": ">=7.0 <7.3",
+    "php": "^7.0",
     "typo3/cms-core": "^9.5"
+  },
+  "require-dev": {
+    "nimut/testing-framework": "^4.1"
   },
   "autoload": {
     "psr-4": {
       "Codemonkey1988\\ScriptStylePush\\": "Classes/"
     }
   },
+  "autoload-dev": {
+    "psr-4": {
+      "Codemonkey1988\\ScriptStylePush\\Tests\\": "Tests"
+    }
+  },
   "replace": {
-    "script_style_push": "self.version",
     "typo3-ter/script-style-push": "self.version"
   },
   "config": {
