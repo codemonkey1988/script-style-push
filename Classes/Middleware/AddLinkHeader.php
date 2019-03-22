@@ -46,7 +46,9 @@ class AddLinkHeader implements MiddlewareInterface
 
         /** @var Asset $asset */
         foreach ($assets as $asset) {
-            $assetsToPush[] = $this->buildHeaderForSingleAsset($asset);
+            if ($asset->isPushEnabled()) {
+                $assetsToPush[] = $this->buildHeaderForSingleAsset($asset);
+            }
         }
 
         return implode(',', $assetsToPush);
