@@ -3,42 +3,20 @@ sudo: false
 branches:
   only:
     - master
-    - develop
-    - /^feature\/.*$/
-
-matrix:
-  fast_finish: true
-  allow_failures:
-    - env: TYPO3_VERSION="dev-master"
-  include:
-    - php: 7.3
-      env: TYPO3_VERSION="dev-master"
-    - php: 7.2
-      env: TYPO3_VERSION="dev-master"
-    - php: 7.3
-      env: TYPO3_VERSION=^9
-    - php: 7.2
-      env: TYPO3_VERSION=^9
+    - /^([0-9]+\.){1,2}(x|[0-9]+)$/
 
 cache:
   directories:
     - $HOME/.composer/cache
 
-addons:
-  apt:
-    packages:
-      - parallel
-
 notifications:
   email:
-    - schreiner.tim@gmail.com
+    - dev@tim-schreiner.de
 
 before_install:
-  - composer self-update
-  - composer --version
+  - if php -i | grep -v TRAVIS_CMD | grep -q xdebug; then phpenv config-rm xdebug.ini; fi
 
-before_script:
-  - phpenv config-rm xdebug.ini
+install:
   - |
     composer require \
       typo3/cms-backend="$TYPO3_VERSION" \
@@ -50,16 +28,39 @@ before_script:
       typo3/cms-frontend="$TYPO3_VERSION" \
       typo3/cms-install="$TYPO3_VERSION" \
       typo3/cms-scheduler="$TYPO3_VERSION" \
+      typo3/cms-recordlist="$TYPO3_VERSION"
   - git checkout composer.json
-  - export TYPO3_PATH_WEB=$PWD/.Build/Web
 
 script:
+  - |
+    echo;
+    echo "Create LocalConfiguration.php";
+    cat > .Build/Web/typo3conf/LocalConfiguration.php << EOF
+    <?php
+    return [];
+    EOF
   - >
     echo;
     echo "Running php lint...";
-    find . -name \*.php ! -path "./.Build/*" | parallel --gnu php -d display_errors=stderr -l {} > /dev/null \;
+    find . -name \*.php ! -path "./.Build/*" -exec php -d display_errors=stderr -l {} > /dev/null \;
   - >
     echo;
     echo "Running unit tests...";
-    .Build/bin/phpunit -c Tests/Unit/UnitTests.xml
+    .Build/bin/phpunit --colors -c .Build/vendor/nimut/testing-framework/res/Configuration/UnitTests.xml Tests/Unit/
 
+jobs:
+  allow_failures:
+    - env: TYPO3_VERSION="dev-master"
+  include:
+    - stage: test
+      php: 7.3
+      env: TYPO3_VERSION="dev-master"
+    - stage: test
+      php: 7.2
+      env: TYPO3_VERSION="dev-master"
+    - stage: test
+      php: 7.3
+      env: TYPO3_VERSION=^9.5
+    - stage: test
+      php: 7.2
+      env: TYPO3_VERSION=^9.5
