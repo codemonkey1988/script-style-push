@@ -13,7 +13,7 @@ class AddLinkHeaderTest extends UnitTestCase
     public function areAllAssetsUsedForHeaderContentGeneration()
     {
         $assets = new \SplObjectStorage();
-
+        $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['script_style_push']['enableOverpushPrevention'] = '0';
 
         $styleAsset = new Asset('/my-folder/styles.css');
         $scriptAsset = new Asset('/my-folder/scripts.js');
