@@ -18,6 +18,11 @@ class AssetCollector implements SingletonInterface
     protected $additionalAssets;
 
     /**
+     * @var string
+     */
+    protected $excludePattern;
+
+    /**
      * @var \SplObjectStorage
      */
     protected $assets;
@@ -25,11 +30,13 @@ class AssetCollector implements SingletonInterface
     /**
      * @param string $html The html to look for assets
      * @param string $additionalAssets Comma-separated string of asset urls
+     * @param string $excludePattern A regex pattern to exclude files from getting pushed
      */
-    public function __construct(string $html, string $additionalAssets = '')
+    public function __construct(string $html, string $additionalAssets = '', string $excludePattern = '')
     {
         $this->html = $html;
         $this->additionalAssets = $additionalAssets;
+        $this->excludePattern = $excludePattern;
         $this->assets = new \SplObjectStorage();
     }
 
@@ -54,7 +61,10 @@ class AssetCollector implements SingletonInterface
         $result = array_filter(array_merge($matches[1], $matches[2]));
 
         foreach ($result as $file) {
-            $this->assets->attach(new Asset($file));
+            $asset = new Asset($file);
+            if (!$this->assetIsExcluded($asset)) {
+                $this->assets->attach($asset);
+            }
         }
     }
 
@@ -71,8 +81,24 @@ class AssetCollector implements SingletonInterface
                 $absFilePrefix = $GLOBALS['TSFE']->absRefPrefix;
 
                 $asset = new Asset('/' . ltrim($absFilePrefix, '/') . ltrim($file, '/'));
-                $this->assets->attach($asset);
+
+                if (!$this->assetIsExcluded($asset)) {
+                    $this->assets->attach($asset);
+                }
             }
         }
+    }
+
+    /**
+     * @param Asset $asset
+     * @return bool
+     */
+    protected function assetIsExcluded(Asset $asset): bool
+    {
+        if (!$this->excludePattern) {
+            return false;
+        }
+
+        return (bool)preg_match('/' . $this->excludePattern . '/', $asset->getFile());
     }
 }

@@ -30,7 +30,8 @@ class AddLinkHeader implements MiddlewareInterface
             $response->getBody()->rewind();
             $body = $response->getBody()->getContents();
             $additionalAssets = $site->getConfiguration()['assetsToPush'] ?? '';
-            $assetCollector = new AssetCollector($body, $additionalAssets);
+            $excludePattern = $site->getConfiguration()['excludePattern'] ?? '';
+            $assetCollector = new AssetCollector($body, $additionalAssets, $excludePattern);
             $headerContent = $this->renderHeaderContent($assetCollector->fetch());
             if ($headerContent) {
                 $response = $response->withHeader('Link', $headerContent);

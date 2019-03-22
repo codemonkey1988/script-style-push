@@ -10,7 +10,18 @@ $GLOBALS['SiteConfiguration']['site']['columns']['assetsToPush'] = [
     ],
 ];
 
+$GLOBALS['SiteConfiguration']['site']['columns']['excludePattern'] = [
+    'label' => 'LLL:EXT:script_style_push/Resources/Private/Language/locallang_be.xlf:siteConfiguration.site.excludePattern.label',
+    'description' => 'LLL:EXT:script_style_push/Resources/Private/Language/locallang_be.xlf:siteConfiguration.site.excludePattern.description',
+    'config' => [
+        'type' => 'input',
+        'eval' => 'trim',
+        'placeholder' => 'LLL:EXT:script_style_push/Resources/Private/Language/locallang_be.xlf:siteConfiguration.site.excludePattern.placeholder',
+    ],
+];
+
 $GLOBALS['SiteConfiguration']['site']['types']['0']['showitem'] .= ',
     --div--;LLL:EXT:script_style_push/Resources/Private/Language/locallang_be.xlf:siteConfiguration.site.tab.pushAssets,
-        assetsToPush
+        assetsToPush,
+        excludePattern
 ';

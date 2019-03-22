@@ -71,4 +71,17 @@ class AssetCollectorTest extends UnitTestCase
 
         $this->assertCount(8, $assets);
     }
+
+    /**
+     * @test
+     */
+    public function ignoreAssetForPushing()
+    {
+        $html = file_get_contents(__DIR__ . '/../Fixtures/Website.html');
+        $additionalAssets = 'my-folder/my-file.css, my-folder/my-font.woff2';
+        $subject = new AssetCollector($html, $additionalAssets, '(\/my-style2\.css)');
+        $assets = $subject->fetch();
+
+        $this->assertCount(7, $assets);
+    }
 }

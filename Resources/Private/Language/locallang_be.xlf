@@ -16,6 +16,15 @@
             <trans-unit id="siteConfiguration.site.assetsToPush.placeholder">
                 <source>EXT:site_package/Resources/Public/fonts/example.woff</source>
             </trans-unit>
+            <trans-unit id="siteConfiguration.site.excludePattern.label">
+                <source>Exclude pattern for assets</source>
+            </trans-unit>
+            <trans-unit id="siteConfiguration.site.excludePattern.description">
+                <source>A regular expression for excluding assets from being pushed</source>
+            </trans-unit>
+            <trans-unit id="siteConfiguration.site.excludePattern.placeholder">
+                <source>(\/print\.css)</source>
+            </trans-unit>
         </body>
     </file>
 </xliff>
