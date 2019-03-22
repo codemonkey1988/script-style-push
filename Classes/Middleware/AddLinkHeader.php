@@ -26,7 +26,7 @@ class AddLinkHeader implements MiddlewareInterface
         $response = $handler->handle($request);
         $site = $request->getAttribute('site');
 
-        if (!Configuration::isPushDisabled() && $site instanceof Site && !$this->isXhrRequest()) {
+        if ($this->isHttp2Request($request) && !Configuration::isPushDisabled() && $site instanceof Site && !$this->isXhrRequest()) {
             $response->getBody()->rewind();
             $body = $response->getBody()->getContents();
             $additionalAssets = $site->getConfiguration()['assetsToPush'] ?? '';
@@ -96,5 +96,14 @@ class AddLinkHeader implements MiddlewareInterface
     protected function isXhrRequest(): bool
     {
         return (bool)GeneralUtility::getIndpEnv('HTTP_REFERRER');
+    }
+
+    /**
+     * @param ServerRequestInterface $request
+     * @return bool
+     */
+    protected function isHttp2Request(ServerRequestInterface $request): bool
+    {
+        return $request->getUri()->getScheme() === 'https' && $request->getProtocolVersion() >= 2.0;
     }
 }
