@@ -72,7 +72,11 @@ class AssetCache implements SingletonInterface
             ->get('script_style_push', 'enableOverpushPrevention');
 
         if ($doSetCookie) {
-            setcookie($this->cookieName, implode(',', $this->pushedAssets), $this->lifetime);
+            $normalizedParams = $GLOBALS['TYPO3_REQUEST']->getAttribute('normalizedParams');
+            $isHttps = $normalizedParams->isHttps();
+            $cookieSecure = (bool)$GLOBALS['TYPO3_CONF_VARS']['SYS']['cookieSecure'] && $isHttps;
+
+            setcookie($this->cookieName, implode(',', $this->pushedAssets), $this->lifetime, '/', '', $cookieSecure, true);
         }
     }
 }
