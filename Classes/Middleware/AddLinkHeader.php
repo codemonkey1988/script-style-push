@@ -104,6 +104,6 @@ class AddLinkHeader implements MiddlewareInterface
      */
     protected function isHttp2Request(ServerRequestInterface $request): bool
     {
-        return $request->getUri()->getScheme() === 'https' && $request->getProtocolVersion() >= 2.0;
+        return $request->getUri()->getScheme() === 'https';
     }
 }
