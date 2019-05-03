@@ -28,12 +28,18 @@ class AssetCache implements SingletonInterface
     protected $pushedAssets;
 
     /**
+     * @var bool An flag that indicates, if an assets was added to the cache.
+     */
+    protected $changed;
+
+    /**
      * AssetCache constructor.
      * @param string $cookieName The name of the cookie
      * @param int $lifetime Lifetime of the cookie in seconds
      */
     public function __construct($cookieName = 'typo3_ssp_assets', $lifetime = 0)
     {
+        $this->changed = false;
         $this->cookieName = $cookieName;
         $this->lifetime = $lifetime;
         $this->pushedAssets = explode(',', $_COOKIE[$this->cookieName] ?? '');
@@ -60,6 +66,7 @@ class AssetCache implements SingletonInterface
     {
         if ($this->shouldPush($asset)) {
             $this->pushedAssets[] = $asset->getFile();
+            $this->changed = true;
         }
     }
 
@@ -71,7 +78,7 @@ class AssetCache implements SingletonInterface
         $doSetCookie = (bool)GeneralUtility::makeInstance(ExtensionConfiguration::class)
             ->get('script_style_push', 'enableOverpushPrevention');
 
-        if ($doSetCookie) {
+        if ($doSetCookie && $this->changed) {
             $normalizedParams = $GLOBALS['TYPO3_REQUEST']->getAttribute('normalizedParams');
             $isHttps = $normalizedParams->isHttps();
             $cookieSecure = (bool)$GLOBALS['TYPO3_CONF_VARS']['SYS']['cookieSecure'] && $isHttps;
