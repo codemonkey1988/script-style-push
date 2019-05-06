@@ -42,7 +42,7 @@ class AssetCache implements SingletonInterface
         $this->changed = false;
         $this->cookieName = $cookieName;
         $this->lifetime = $lifetime;
-        $this->pushedAssets = explode(',', $_COOKIE[$this->cookieName] ?? '');
+        $this->pushedAssets = array_unique(GeneralUtility::trimExplode(',', $_COOKIE[$this->cookieName] ?? ''));
     }
 
     /**
