@@ -43,7 +43,7 @@ class AssetCache implements SingletonInterface
         $configuration = GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('script_style_push');
         $this->pushedAssets = [];
         $this->cookieName = $configuration['overpushPreventionCookieName'] ?? self::DEFAULT_COOKIE_NAME;
-        $this->lifetime = (int)($configuration['overpushPreventionCookieLifetime'] ?? self::DEFAULT_COOKIE_LIFETIME) * 86400;
+        $this->lifetime = $GLOBALS['EXEC_TIME'] + (int)($configuration['overpushPreventionCookieLifetime'] ?? self::DEFAULT_COOKIE_LIFETIME) * 86400;
         $this->enabled = (bool)$configuration['enableOverpushPrevention'] ?? true;
     }
 
