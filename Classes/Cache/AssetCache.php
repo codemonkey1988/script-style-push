@@ -77,7 +77,7 @@ class AssetCache implements SingletonInterface
     public function add(Asset $asset)
     {
         if ($this->shouldPush($asset)) {
-            $this->pushedAssets[] = $asset->getFile();
+            $this->pushedAssets[] = $this->removeVersionNumberFromAsset($asset->getFile());
         }
     }
 
