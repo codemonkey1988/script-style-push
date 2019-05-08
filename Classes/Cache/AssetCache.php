@@ -28,18 +28,12 @@ class AssetCache implements SingletonInterface
     protected $pushedAssets;
 
     /**
-     * @var bool An flag that indicates, if an assets was added to the cache.
-     */
-    protected $changed;
-
-    /**
      * AssetCache constructor.
      * @param string $cookieName The name of the cookie
      * @param int $lifetime Lifetime of the cookie in seconds
      */
     public function __construct($cookieName = 'typo3_ssp_assets', $lifetime = 0)
     {
-        $this->changed = false;
         $this->cookieName = $cookieName;
         $this->lifetime = $lifetime;
         $this->pushedAssets = [];
@@ -50,7 +44,7 @@ class AssetCache implements SingletonInterface
      */
     public function load()
     {
-        $this->pushedAssets = array_unique($this->readCache($this->cookieName));
+        $this->pushedAssets = $this->removeVersionNumberFromAssets($this->readCache($this->cookieName));
     }
 
     /**
@@ -62,7 +56,9 @@ class AssetCache implements SingletonInterface
      */
     public function shouldPush(Asset $asset): bool
     {
-        return !in_array($asset->getFile(), $this->pushedAssets);
+        $assetPath = $this->removeVersionNumberFromAsset($asset->getFile());
+
+        return !in_array($assetPath, $this->pushedAssets);
     }
 
     /**
@@ -74,7 +70,6 @@ class AssetCache implements SingletonInterface
     {
         if ($this->shouldPush($asset)) {
             $this->pushedAssets[] = $asset->getFile();
-            $this->changed = true;
         }
     }
 
@@ -86,7 +81,7 @@ class AssetCache implements SingletonInterface
         $doSetCookie = (bool)GeneralUtility::makeInstance(ExtensionConfiguration::class)
             ->get('script_style_push', 'enableOverpushPrevention');
 
-        if ($doSetCookie && $this->changed) {
+        if ($doSetCookie && $this->readCache($this->cookieName) !== $this->pushedAssets) {
             $this->writeCache($this->cookieName, $this->pushedAssets, $this->lifetime);
         }
     }
@@ -114,5 +109,57 @@ class AssetCache implements SingletonInterface
         $cookieSecure = (bool)$GLOBALS['TYPO3_CONF_VARS']['SYS']['cookieSecure'] && $isHttps;
 
         setcookie($identifier, implode(',', $value), $lifetime, '/', '', $cookieSecure, true);
+    }
+
+    /**
+     * @param array $assets
+     * @return array
+     */
+    protected function removeVersionNumberFromAssets(array $assets): array
+    {
+        $assets = array_map([$this, 'removeVersionNumberFromAsset'], $assets);
+
+        return array_filter(array_unique($assets));
+    }
+
+    /**
+     * @param string $asset
+     * @return string
+     */
+    protected function removeVersionNumberFromAsset(string $asset): string
+    {
+        if (!$this->assetHasVersionNumber($asset)) {
+            return $asset;
+        }
+
+        if ($this->isVersionNumberEmbedded()) {
+            return preg_replace('/^(.*)(\.\d{10})(\..*)$/i', '$1$3', $asset);
+        }
+
+        // We know that the asset has exactly 10 numbers as version string and a leading ? = 11 characters.
+        return substr($asset, 0, strlen($asset)-11);
+    }
+
+    /**
+     * @param string $asset
+     * @return bool
+     */
+    protected function assetHasVersionNumber(string $asset): bool
+    {
+        $pattern = '/\?\d{10}$/i';
+
+        if ($this->isVersionNumberEmbedded()) {
+            $pattern = '/\.\d{10}\..*/i';
+        }
+
+        return (bool)preg_match($pattern, $asset);
+    }
+
+    /**
+     * @return bool
+     */
+    protected function isVersionNumberEmbedded(): bool
+    {
+        return $GLOBALS['TYPO3_CONF_VARS']['FE']['versionNumberInFilename'] === 'embed';
     }
 }
