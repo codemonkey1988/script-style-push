@@ -42,7 +42,15 @@ class AssetCache implements SingletonInterface
         $this->changed = false;
         $this->cookieName = $cookieName;
         $this->lifetime = $lifetime;
-        $this->pushedAssets = array_unique(GeneralUtility::trimExplode(',', $_COOKIE[$this->cookieName] ?? ''));
+        $this->pushedAssets = [];
+    }
+
+    /**
+     * Loads the current cache items.
+     */
+    public function load()
+    {
+        $this->pushedAssets = array_unique($this->readCache($this->cookieName));
     }
 
     /**
@@ -79,11 +87,32 @@ class AssetCache implements SingletonInterface
             ->get('script_style_push', 'enableOverpushPrevention');
 
         if ($doSetCookie && $this->changed) {
-            $normalizedParams = $GLOBALS['TYPO3_REQUEST']->getAttribute('normalizedParams');
-            $isHttps = $normalizedParams->isHttps();
-            $cookieSecure = (bool)$GLOBALS['TYPO3_CONF_VARS']['SYS']['cookieSecure'] && $isHttps;
-
-            setcookie($this->cookieName, implode(',', $this->pushedAssets), $this->lifetime, '/', '', $cookieSecure, true);
+            $this->writeCache($this->cookieName, $this->pushedAssets, $this->lifetime);
         }
+    }
+
+    /**
+     * @param string $identifier
+     * @return array
+     */
+    protected function readCache(string $identifier): array
+    {
+        $cookieContent = $_COOKIE[$identifier] ?? '';
+
+        return GeneralUtility::trimExplode(',', $cookieContent);
+    }
+
+    /**
+     * @param string $identifier
+     * @param array $value
+     * @param int $lifetime
+     */
+    protected function writeCache(string $identifier, array $value, int $lifetime = 0)
+    {
+        $normalizedParams = $GLOBALS['TYPO3_REQUEST']->getAttribute('normalizedParams');
+        $isHttps = $normalizedParams->isHttps();
+        $cookieSecure = (bool)$GLOBALS['TYPO3_CONF_VARS']['SYS']['cookieSecure'] && $isHttps;
+
+        setcookie($identifier, implode(',', $value), $lifetime, '/', '', $cookieSecure, true);
     }
 }

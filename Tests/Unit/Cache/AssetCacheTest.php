@@ -27,10 +27,13 @@ class AssetCacheTest extends UnitTestCase
      */
     public function shouldPushAssetReturnsFalse()
     {
-        $_COOKIE['typo3_ssp_assets'] = '/my-file.jpg';
+        $subject = $this->getAccessibleMock(AssetCache::class, ['readCache']);
+        $subject
+            ->method('readCache')
+            ->willReturn(['/my-file.jpg']);
+        $subject->load();
 
         $asset = new Asset('/my-file.jpg');
-        $subject = new AssetCache();
 
         $this->assertFalse($subject->shouldPush($asset));
     }
@@ -40,11 +43,35 @@ class AssetCacheTest extends UnitTestCase
      */
     public function addAssetAndCheckIfItsAddded()
     {
-        $asset = new Asset('/my-file.jpg');
-        $subject = new AssetCache();
+        $asset = new Asset('/test/my-file.css?123456');
+        $subject = $this->getAccessibleMock(AssetCache::class, ['readCache']);
+        $subject
+            ->method('readCache')
+            ->willReturn(['/test/my-file.css?123456', '/test/my-file2.css?123456']);
 
-        $subject->add($asset);
-
+        $subject->load();
         $this->assertFalse($subject->shouldPush($asset));
+    }
+
+    /**
+     * @test
+     */
+    public function persistAssets()
+    {
+        $assets = [
+            '/test/my-file.css?123456',
+            '/test/my-file2.css?123456',
+        ];
+
+        $subject = $this->getAccessibleMock(AssetCache::class, ['writeCache']);
+        $subject
+            ->expects($this->once())
+            ->method('writeCache')
+            ->with('typo3_ssp_assets', $assets, 0);
+
+        $subject->add(new Asset($assets[0]));
+        $subject->add(new Asset($assets[1]));
+
+        $subject->persist();
     }
 }

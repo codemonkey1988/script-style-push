@@ -49,6 +49,7 @@ class AddLinkHeader implements MiddlewareInterface
     {
         $assetsToPush = [];
         $assetCache = GeneralUtility::makeInstance(AssetCache::class);
+        $assetCache->load();
 
         /** @var Asset $asset */
         foreach ($assets as $asset) {
