@@ -1,2 +1,8 @@
 # cat=basic/enable; type=boolean; label=Enable over-push prevention:By enabling this, a session cookie will be set that contains every assets pushed to the client. Assets that were already pushed are not pushed again.
 enableOverpushPrevention = 1
+
+# cat=basic/enable; type=string; label=Overpush cookie name:The name of the cookie for storing pushed assets
+overpushPreventionCookieName = typo3_ssp_assets
+
+# cat=basic/enable; type=number; label=Overpush cookie lifetime:The lifetime of the cookie for overpush (in days)
+overpushPreventionCookieLifetime = 7

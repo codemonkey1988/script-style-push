@@ -12,6 +12,14 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  */
 class AssetCache implements SingletonInterface
 {
+    const DEFAULT_COOKIE_NAME = 'typo3_ssp_assets';
+    const DEFAULT_COOKIE_LIFETIME = 7;
+
+    /**
+     * @var bool
+     */
+    protected $enabled;
+
     /**
      * @var string
      */
@@ -29,14 +37,14 @@ class AssetCache implements SingletonInterface
 
     /**
      * AssetCache constructor.
-     * @param string $cookieName The name of the cookie
-     * @param int $lifetime Lifetime of the cookie in seconds
      */
-    public function __construct($cookieName = 'typo3_ssp_assets', $lifetime = 0)
+    public function __construct()
     {
-        $this->cookieName = $cookieName;
-        $this->lifetime = $lifetime;
+        $configuration = GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('script_style_push');
         $this->pushedAssets = [];
+        $this->cookieName = $configuration['overpushPreventionCookieName'] ?? self::DEFAULT_COOKIE_NAME;
+        $this->lifetime = (int)($configuration['overpushPreventionCookieLifetime'] ?? self::DEFAULT_COOKIE_LIFETIME) * 86400;
+        $this->enabled = (bool)$configuration['enableOverpushPrevention'] ?? true;
     }
 
     /**
@@ -78,10 +86,7 @@ class AssetCache implements SingletonInterface
      */
     public function persist()
     {
-        $doSetCookie = (bool)GeneralUtility::makeInstance(ExtensionConfiguration::class)
-            ->get('script_style_push', 'enableOverpushPrevention');
-
-        if ($doSetCookie && $this->readCache($this->cookieName) !== $this->pushedAssets) {
+        if ($this->enabled && $this->readCache($this->cookieName) !== $this->pushedAssets) {
             $this->writeCache($this->cookieName, $this->pushedAssets, $this->lifetime);
         }
     }
