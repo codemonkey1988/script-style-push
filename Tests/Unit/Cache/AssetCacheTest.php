@@ -67,7 +67,7 @@ class AssetCacheTest extends UnitTestCase
         $subject
             ->expects($this->once())
             ->method('writeCache')
-            ->with('typo3_ssp_assets', $assets, 7*86400);
+            ->with('typo3_ssp_assets', $assets, $GLOBALS['EXEC_TIME']+7*86400);
 
         $subject->add(new Asset($assets[0]));
         $subject->add(new Asset($assets[1]));
