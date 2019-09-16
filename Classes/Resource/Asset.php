@@ -20,6 +20,7 @@ class Asset
         'jpeg' => 'image',
         'bmp' => 'image',
         'tiff' => 'image',
+        'ico' => 'image',
         'mp4' => 'media',
         'ogv' => 'media',
         'woff' => 'font',
