@@ -51,6 +51,18 @@ class ScriptViewHelper extends AbstractAssetViewHelper
     /**
      * {@inheritdoc}
      */
+    public function render()
+    {
+        if (version_compare(TYPO3_version, '10.3', '>=')) {
+            trigger_error('ScriptViewHelper (script_style_push) has been deprecated and will be removed in 3.0. Please use f:asset.script instead.', E_USER_DEPRECATED);
+        }
+
+        parent::render();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     protected function buildResourceInformation()
     {
         $resource = parent::buildResourceInformation();
