@@ -6,7 +6,7 @@ $EM_CONF[$_EXTKEY] = [
     'category'         => 'fe',
     'constraints'       => [
         'depends'   => [
-            'typo3' => '9.5.0-10.3.99'
+            'typo3' => '9.5.0-10.4.99'
         ],
         'conflicts' => [],
         'suggests'  => []
@@ -18,5 +18,5 @@ $EM_CONF[$_EXTKEY] = [
     'author'           => 'Tim Schreiner',
     'author_email'     => 'schreiner.tim@gmail.com',
     'author_company'   => '',
-    'version'          => '2.2.0'
+    'version'          => '2.3.0'
 ];
