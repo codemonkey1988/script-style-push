@@ -2,6 +2,7 @@
 declare(strict_types=1);
 namespace Codemonkey1988\ScriptStylePush\Resource;
 
+use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\SingletonInterface;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
@@ -71,7 +72,7 @@ class AssetCollector implements SingletonInterface
     protected function fetchAdditionalAssets()
     {
         $additionalAssets = GeneralUtility::trimExplode(',', $this->additionalAssets);
-        $absPathLength = strlen(PATH_site);
+        $absPathLength = strlen(Environment::getPublicPath());
 
         foreach ($additionalAssets as $file) {
             $file = GeneralUtility::getFileAbsFileName($file);
