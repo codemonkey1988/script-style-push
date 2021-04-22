@@ -5,7 +5,7 @@
   "homepage": "https://github.com/codemonkey1988/script-style-push/",
   "license": ["GPL-2.0-or-later"],
   "keywords": [
-    "TYPO3 CMS", 
+    "TYPO3 CMS",
     "script_style_push",
     "http2",
     "push"
@@ -51,7 +51,8 @@
   "extra": {
     "typo3/cms": {
       "cms-package-dir": "{$vendor-dir}/typo3/cms",
-      "web-dir": ".Build/Web"
+      "web-dir": ".Build/Web",
+      "extension-key": "script_style_push"
     }
   }
 }
