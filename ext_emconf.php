@@ -1,5 +1,12 @@
 <?php
 
+/*
+ * This file is part of the "script_style_push" Extension for TYPO3 CMS.
+ *
+ * For the full copyright and license information, please read the
+ * LICENSE file that was distributed with this source code.
+ */
+
 $EM_CONF[$_EXTKEY] = [
     'title'            => 'Script Style Push',
     'description'      => 'TYPO3 Extension to push javascript and css files over a http/2 connection.',

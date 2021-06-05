@@ -1,5 +1,12 @@
 <?php
 
+/*
+ * This file is part of the "script_style_push" Extension for TYPO3 CMS.
+ *
+ * For the full copyright and license information, please read the
+ * LICENSE file that was distributed with this source code.
+ */
+
 $GLOBALS['SiteConfiguration']['site']['columns']['assetsToPush'] = [
     'label' => 'LLL:EXT:script_style_push/Resources/Private/Language/locallang_be.xlf:siteConfiguration.site.assetsToPush.label',
     'description' => 'LLL:EXT:script_style_push/Resources/Private/Language/locallang_be.xlf:siteConfiguration.site.assetsToPush.description',

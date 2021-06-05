@@ -1,12 +1,17 @@
 <?php
+
+/*
+ * This file is part of the "script_style_push" Extension for TYPO3 CMS.
+ *
+ * For the full copyright and license information, please read the
+ * LICENSE file that was distributed with this source code.
+ */
+
 namespace Codemonkey1988\ScriptStylePush\Tests\Unit\Resource;
 
 use Codemonkey1988\ScriptStylePush\Resource\AssetCollector;
 use Nimut\TestingFramework\TestCase\UnitTestCase;
 
-/**
- * Class AssetCollectorTest
- */
 class AssetCollectorTest extends UnitTestCase
 {
     public function setUp()
@@ -26,20 +31,20 @@ class AssetCollectorTest extends UnitTestCase
         $subject = new AssetCollector($html);
         $assets = $subject->fetch();
 
-        $this->assertCount(6, $assets);
+        self::assertCount(6, $assets);
 
         $assets->rewind();
-        $this->assertSame('/folder/my-style.css', $assets->current()->getFile());
+        self::assertSame('/folder/my-style.css', $assets->current()->getFile());
         $assets->next();
-        $this->assertSame('/folder/my-style2.css', $assets->current()->getFile());
+        self::assertSame('/folder/my-style2.css', $assets->current()->getFile());
         $assets->next();
-        $this->assertSame('/folder/my-print-style.css', $assets->current()->getFile());
+        self::assertSame('/folder/my-print-style.css', $assets->current()->getFile());
         $assets->next();
-        $this->assertSame('/folder/my-script.js', $assets->current()->getFile());
+        self::assertSame('/folder/my-script.js', $assets->current()->getFile());
         $assets->next();
-        $this->assertSame('/folder/my-script2.js', $assets->current()->getFile());
+        self::assertSame('/folder/my-script2.js', $assets->current()->getFile());
         $assets->next();
-        $this->assertSame('/folder/my-script3.js', $assets->current()->getFile());
+        self::assertSame('/folder/my-script3.js', $assets->current()->getFile());
     }
 
     /**
@@ -51,12 +56,12 @@ class AssetCollectorTest extends UnitTestCase
         $subject = new AssetCollector('', $additionalAssets);
         $assets = $subject->fetch();
 
-        $this->assertCount(2, $assets);
+        self::assertCount(2, $assets);
 
         $assets->rewind();
-        $this->assertSame('/my-folder/my-file.css', $assets->current()->getFile());
+        self::assertSame('/my-folder/my-file.css', $assets->current()->getFile());
         $assets->next();
-        $this->assertSame('/my-folder/my-font.woff2', $assets->current()->getFile());
+        self::assertSame('/my-folder/my-font.woff2', $assets->current()->getFile());
     }
 
     /**
@@ -69,7 +74,7 @@ class AssetCollectorTest extends UnitTestCase
         $subject = new AssetCollector($html, $additionalAssets);
         $assets = $subject->fetch();
 
-        $this->assertCount(8, $assets);
+        self::assertCount(8, $assets);
     }
 
     /**
@@ -82,6 +87,6 @@ class AssetCollectorTest extends UnitTestCase
         $subject = new AssetCollector($html, $additionalAssets, '(\/my-style2\.css)');
         $assets = $subject->fetch();
 
-        $this->assertCount(7, $assets);
+        self::assertCount(7, $assets);
     }
 }

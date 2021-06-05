@@ -1,42 +1,23 @@
 <?php
+
+/*
+ * This file is part of the "script_style_push" Extension for TYPO3 CMS.
+ *
+ * For the full copyright and license information, please read the
+ * LICENSE file that was distributed with this source code.
+ */
+
 namespace Codemonkey1988\ScriptStylePush\ViewHelpers\Asset;
 
-/***************************************************************
- *  This script is part of the TYPO3 project. The TYPO3 project is
- *  free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  The GNU General Public License can be found at
- *  http://www.gnu.org/copyleft/gpl.html.
- *
- *  This script is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  This copyright notice MUST APPEAR in all copies of the script!
- ***************************************************************/
-
-use TYPO3\CMS\Core\Page\PageRenderer;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3Fluid\Fluid\Core\ViewHelper\Exception;
 use TYPO3Fluid\Fluid\Core\ViewHelper\AbstractTagBasedViewHelper;
+use TYPO3Fluid\Fluid\Core\ViewHelper\Exception;
 
-/**
- * Class AbstractAssetViewHelper
- *
- * @package Codemonkey1988\ScriptStylePush\ViewHelpers\Asset
- * @author  Tim Schreiner <schreiner.tim@gmail.com>
- */
 abstract class AbstractAssetViewHelper extends AbstractTagBasedViewHelper
 {
     /**
      * @var int index counter for scripts and styles in page template setup
      */
     protected static $templateSetupDataIndexCounter = 30000;
-
 
     /**
      * @var string
@@ -47,7 +28,6 @@ abstract class AbstractAssetViewHelper extends AbstractTagBasedViewHelper
      * Initialize arguments.
      * Do not call parent to skip default arguments for tag based viewhelpers.
      *
-     * @return void
      * @throws Exception
      */
     public function initializeArguments()
@@ -61,9 +41,6 @@ abstract class AbstractAssetViewHelper extends AbstractTagBasedViewHelper
         $this->registerArgument('excludeFromConcatenation', 'boolean', 'If config.concatenate{TYPE} is enabled, this prevents the file from being concatenated', false, false);
     }
 
-    /**
-     * @return void
-     */
     public function render()
     {
         if (!is_array($GLOBALS['SCRIPT_STYPE_PUSH_ASSETS'])) {
@@ -83,7 +60,7 @@ abstract class AbstractAssetViewHelper extends AbstractTagBasedViewHelper
 
     /**
      * Add the resource to the template setup according to the given position
-     * 
+     *
      * @param string $position
      */
     protected function addResourceToPageTemplateSetup($position)
@@ -131,5 +108,5 @@ abstract class AbstractAssetViewHelper extends AbstractTagBasedViewHelper
      * @param string $position name of the position
      * @return string key name from template setup section
      */
-    public abstract function getTemplateSetupKeyForPosition(string $position);
+    abstract public function getTemplateSetupKeyForPosition(string $position);
 }

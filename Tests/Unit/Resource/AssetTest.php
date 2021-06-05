@@ -1,12 +1,17 @@
 <?php
+
+/*
+ * This file is part of the "script_style_push" Extension for TYPO3 CMS.
+ *
+ * For the full copyright and license information, please read the
+ * LICENSE file that was distributed with this source code.
+ */
+
 namespace Codemonkey1988\ScriptStylePush\Tests\Unit\Resource;
 
 use Codemonkey1988\ScriptStylePush\Resource\Asset;
 use Nimut\TestingFramework\TestCase\UnitTestCase;
 
-/**
- * Class AssetTest
- */
 class AssetTest extends UnitTestCase
 {
     /**
@@ -17,7 +22,7 @@ class AssetTest extends UnitTestCase
         $filePath = '/folder/my-file.css';
         $subject = new Asset($filePath);
 
-        $this->assertSame($filePath, $subject->getFile());
+        self::assertSame($filePath, $subject->getFile());
     }
 
     /**
@@ -27,7 +32,7 @@ class AssetTest extends UnitTestCase
     {
         $subject = new Asset('/folder/my-file.css');
 
-        $this->assertSame('style', $subject->getAssetType());
+        self::assertSame('style', $subject->getAssetType());
     }
 
     /**
@@ -37,7 +42,7 @@ class AssetTest extends UnitTestCase
     {
         $subject = new Asset('/folder/my-file.js');
 
-        $this->assertSame('script', $subject->getAssetType());
+        self::assertSame('script', $subject->getAssetType());
     }
 
     /**
@@ -50,10 +55,10 @@ class AssetTest extends UnitTestCase
         $subjectPng = new Asset('/folder/my-file.png');
         $subjectGif = new Asset('/folder/my-file.gif');
 
-        $this->assertSame('image', $subjectJpg->getAssetType());
-        $this->assertSame('image', $subjectJpeg->getAssetType());
-        $this->assertSame('image', $subjectPng->getAssetType());
-        $this->assertSame('image', $subjectGif->getAssetType());
+        self::assertSame('image', $subjectJpg->getAssetType());
+        self::assertSame('image', $subjectJpeg->getAssetType());
+        self::assertSame('image', $subjectPng->getAssetType());
+        self::assertSame('image', $subjectGif->getAssetType());
     }
 
     /**
@@ -66,10 +71,10 @@ class AssetTest extends UnitTestCase
         $subjectEot = new Asset('/folder/my-file.eot');
         $subjectTtf = new Asset('/folder/my-file.ttf');
 
-        $this->assertSame('font', $subjectWoff->getAssetType());
-        $this->assertSame('font', $subjectWoff2->getAssetType());
-        $this->assertSame('font', $subjectEot->getAssetType());
-        $this->assertSame('font', $subjectTtf->getAssetType());
+        self::assertSame('font', $subjectWoff->getAssetType());
+        self::assertSame('font', $subjectWoff2->getAssetType());
+        self::assertSame('font', $subjectEot->getAssetType());
+        self::assertSame('font', $subjectTtf->getAssetType());
     }
 
     /**
@@ -80,8 +85,8 @@ class AssetTest extends UnitTestCase
         $subjectWoff = new Asset('/folder/my-file.mp4');
         $subjectWoff2 = new Asset('/folder/my-file.ogv');
 
-        $this->assertSame('media', $subjectWoff->getAssetType());
-        $this->assertSame('media', $subjectWoff2->getAssetType());
+        self::assertSame('media', $subjectWoff->getAssetType());
+        self::assertSame('media', $subjectWoff2->getAssetType());
     }
 
     /**
@@ -91,7 +96,7 @@ class AssetTest extends UnitTestCase
     {
         $subject = new Asset('folder/my-file.abc');
 
-        $this->assertSame('', $subject->getAssetType());
+        self::assertSame('', $subject->getAssetType());
     }
 
     /**
@@ -101,7 +106,7 @@ class AssetTest extends UnitTestCase
     {
         $subject = new Asset('/folder/my-file.jpg');
 
-        $this->assertTrue($subject->isLocal());
+        self::assertTrue($subject->isLocal());
     }
 
     /**
@@ -111,7 +116,7 @@ class AssetTest extends UnitTestCase
     {
         $subject = new Asset('https://example.tld/folder/my-file.jpg');
 
-        $this->assertFalse($subject->isLocal());
+        self::assertFalse($subject->isLocal());
     }
 
     /**
@@ -121,7 +126,7 @@ class AssetTest extends UnitTestCase
     {
         $subject = new Asset('/folder/my-file.jpg');
 
-        $this->assertTrue($subject->isPushEnabled());
+        self::assertTrue($subject->isPushEnabled());
     }
 
     /**
@@ -131,7 +136,7 @@ class AssetTest extends UnitTestCase
     {
         $subject = new Asset('https://example.tld/folder/my-file.jpg');
 
-        $this->assertFalse($subject->isPushEnabled());
+        self::assertFalse($subject->isPushEnabled());
     }
 
     /**
@@ -144,10 +149,10 @@ class AssetTest extends UnitTestCase
         $subjectEot = new Asset('/folder/my-file.eot');
         $subjectTtf = new Asset('/folder/my-file.ttf');
 
-        $this->assertSame('font/woff', $subjectWoff->getType());
-        $this->assertSame('font/woff2', $subjectWoff2->getType());
-        $this->assertSame('font/eot', $subjectEot->getType());
-        $this->assertSame('font/ttf', $subjectTtf->getType());
+        self::assertSame('font/woff', $subjectWoff->getType());
+        self::assertSame('font/woff2', $subjectWoff2->getType());
+        self::assertSame('font/eot', $subjectEot->getType());
+        self::assertSame('font/ttf', $subjectTtf->getType());
     }
 
     /**
@@ -157,7 +162,7 @@ class AssetTest extends UnitTestCase
     {
         $subject = new Asset('folder/my-file.jpg');
 
-        $this->assertSame('', $subject->getType());
+        self::assertSame('', $subject->getType());
     }
 
     /**
@@ -170,10 +175,10 @@ class AssetTest extends UnitTestCase
         $subjectEot = new Asset('/folder/my-file.eot');
         $subjectTtf = new Asset('/folder/my-file.ttf');
 
-        $this->assertTrue($subjectWoff->isCrossorigin());
-        $this->assertTrue($subjectWoff2->isCrossorigin());
-        $this->assertTrue($subjectEot->isCrossorigin());
-        $this->assertTrue($subjectTtf->isCrossorigin());
+        self::assertTrue($subjectWoff->isCrossorigin());
+        self::assertTrue($subjectWoff2->isCrossorigin());
+        self::assertTrue($subjectEot->isCrossorigin());
+        self::assertTrue($subjectTtf->isCrossorigin());
     }
 
     /**
@@ -183,6 +188,6 @@ class AssetTest extends UnitTestCase
     {
         $subject = new Asset('/folder/my-file.jpg');
 
-        $this->assertFalse($subject->isCrossorigin());
+        self::assertFalse($subject->isCrossorigin());
     }
 }

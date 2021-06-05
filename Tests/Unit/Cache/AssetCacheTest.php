@@ -1,14 +1,20 @@
 <?php
+
 declare(strict_types=1);
+
+/*
+ * This file is part of the "script_style_push" Extension for TYPO3 CMS.
+ *
+ * For the full copyright and license information, please read the
+ * LICENSE file that was distributed with this source code.
+ */
+
 namespace Codemonkey1988\ScriptStylePush\Tests\Unit\Cache;
 
 use Codemonkey1988\ScriptStylePush\Cache\AssetCache;
 use Codemonkey1988\ScriptStylePush\Resource\Asset;
 use Nimut\TestingFramework\TestCase\UnitTestCase;
 
-/**
- * Class AssetCacheTest
- */
 class AssetCacheTest extends UnitTestCase
 {
     /**
@@ -19,7 +25,7 @@ class AssetCacheTest extends UnitTestCase
         $asset = new Asset('/my-file.jpg');
         $subject = new AssetCache();
 
-        $this->assertTrue($subject->shouldPush($asset));
+        self::assertTrue($subject->shouldPush($asset));
     }
 
     /**
@@ -35,7 +41,7 @@ class AssetCacheTest extends UnitTestCase
 
         $asset = new Asset('/my-file.jpg');
 
-        $this->assertFalse($subject->shouldPush($asset));
+        self::assertFalse($subject->shouldPush($asset));
     }
 
     /**
@@ -50,7 +56,7 @@ class AssetCacheTest extends UnitTestCase
             ->willReturn(['/test/my-file.css?123456', '/test/my-file2.css?123456']);
 
         $subject->load();
-        $this->assertFalse($subject->shouldPush($asset));
+        self::assertFalse($subject->shouldPush($asset));
     }
 
     /**
@@ -65,7 +71,7 @@ class AssetCacheTest extends UnitTestCase
 
         $subject = $this->getAccessibleMock(AssetCache::class, ['writeCache']);
         $subject
-            ->expects($this->once())
+            ->expects(self::once())
             ->method('writeCache')
             ->with('typo3_ssp_assets', $assets, $GLOBALS['EXEC_TIME']+7*86400);
 
@@ -82,7 +88,7 @@ class AssetCacheTest extends UnitTestCase
     {
         $subject= $this->getAccessibleMockForAbstractClass(AssetCache::class);
 
-        $this->assertEquals('/test/styles.css', $subject->_call('removeVersionNumberFromAsset', '/test/styles.css?1234567890'));
+        self::assertEquals('/test/styles.css', $subject->_call('removeVersionNumberFromAsset', '/test/styles.css?1234567890'));
     }
 
     /**
@@ -93,7 +99,7 @@ class AssetCacheTest extends UnitTestCase
         $GLOBALS['TYPO3_CONF_VARS']['FE']['versionNumberInFilename'] = 'embed';
         $subject= $this->getAccessibleMockForAbstractClass(AssetCache::class);
 
-        $this->assertEquals('/test/styles.css', $subject->_call('removeVersionNumberFromAsset', '/test/styles.1234567890.css'));
+        self::assertEquals('/test/styles.css', $subject->_call('removeVersionNumberFromAsset', '/test/styles.1234567890.css'));
     }
 
     /**
@@ -117,8 +123,8 @@ class AssetCacheTest extends UnitTestCase
 
         $asset = new Asset('/test/my-file.css?1557316025');
 
-        $this->assertFalse($subject->shouldPush($asset));
-        $this->assertCount(2, $subject->_get('pushedAssets'));
-        $this->assertEquals(['/test/my-file.css', '/test/my-file2.css'], $subject->_get('pushedAssets'));
+        self::assertFalse($subject->shouldPush($asset));
+        self::assertCount(2, $subject->_get('pushedAssets'));
+        self::assertEquals(['/test/my-file.css', '/test/my-file2.css'], $subject->_get('pushedAssets'));
     }
 }

@@ -1,4 +1,12 @@
 <?php
+
+/*
+ * This file is part of the "script_style_push" Extension for TYPO3 CMS.
+ *
+ * For the full copyright and license information, please read the
+ * LICENSE file that was distributed with this source code.
+ */
+
 namespace Codemonkey1988\ScriptStylePush\Tests\Unit\Middleware;
 
 use Codemonkey1988\ScriptStylePush\Middleware\AddLinkHeader;
@@ -35,6 +43,6 @@ class AddLinkHeaderTest extends UnitTestCase
             '</my-folder/font.woff>;rel=preload;as=font;type=font/woff;crossorigin',
         ];
 
-        $this->assertSame(implode(',', $expected), $headerContent);
+        self::assertSame(implode(',', $expected), $headerContent);
     }
 }

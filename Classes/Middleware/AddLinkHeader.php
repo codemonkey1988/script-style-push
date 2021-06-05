@@ -1,5 +1,14 @@
 <?php
+
 declare(strict_types=1);
+
+/*
+ * This file is part of the "script_style_push" Extension for TYPO3 CMS.
+ *
+ * For the full copyright and license information, please read the
+ * LICENSE file that was distributed with this source code.
+ */
+
 namespace Codemonkey1988\ScriptStylePush\Middleware;
 
 use Codemonkey1988\ScriptStylePush\Cache\AssetCache;
@@ -13,9 +22,6 @@ use Psr\Http\Server\RequestHandlerInterface;
 use TYPO3\CMS\Core\Site\Entity\Site;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
-/**
- * Class AddLinkHeader
- */
 class AddLinkHeader implements MiddlewareInterface
 {
     /**
@@ -75,10 +81,10 @@ class AddLinkHeader implements MiddlewareInterface
             'rel=preload',
         ];
 
-        if ( $asset->getAssetType()) {
+        if ($asset->getAssetType()) {
             $parts[] = 'as=' . $asset->getAssetType();
         }
-        if ( $asset->getType()) {
+        if ($asset->getType()) {
             $parts[] = 'type=' . $asset->getType();
         }
         if ($asset->isCrossorigin()) {

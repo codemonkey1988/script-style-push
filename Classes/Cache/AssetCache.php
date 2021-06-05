@@ -1,5 +1,14 @@
 <?php
+
 declare(strict_types=1);
+
+/*
+ * This file is part of the "script_style_push" Extension for TYPO3 CMS.
+ *
+ * For the full copyright and license information, please read the
+ * LICENSE file that was distributed with this source code.
+ */
+
 namespace Codemonkey1988\ScriptStylePush\Cache;
 
 use Codemonkey1988\ScriptStylePush\Resource\Asset;
@@ -7,9 +16,6 @@ use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\SingletonInterface;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
-/**
- * Class AssetCache
- */
 class AssetCache implements SingletonInterface
 {
     const DEFAULT_COOKIE_NAME = 'typo3_ssp_assets';
